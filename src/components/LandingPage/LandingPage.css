@@ -1,0 +1,122 @@
+
+ .landing-container {
+    width: 100vw; 
+    height: 100vh;
+    display: flex;
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    background: #000;
+    overflow: hidden;
+    color: #bbb;
+    background: url("../../assets/bg2.jpg") no-repeat center center;
+    background-size: cover;
+  }
+  
+  /* Navbar Styling */
+  .navbar {
+    width: 100%;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between; 
+    align-items: center;
+  }
+  
+  /* Navbar Logo */
+.logo-img {
+    padding-top: 10px;
+    height: 100px;
+    border-radius: 50%;
+    width: auto;
+    object-fit: contain; 
+  }
+  
+  
+  .auth-buttons{
+    margin-left: auto; /* Pushes buttons to the right */
+    display: flex;
+    gap: 20px;
+    color: #bbb;
+    flex-direction: row;
+    width: auto;
+  }
+  
+ 
+  
+  /* Hero Section */
+  .hero {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    width: 100%;
+    padding: 0 5%;
+  }
+  .authbuttons{
+    border-radius: 5px;
+    border:#bbb 1px solid;
+    color: #bbb;
+    padding: 12px 10px;
+  }
+  /* Hero Title */
+  .hero-title {
+    font-size: 3.5rem;
+    font-weight: bold;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+  }
+  
+  /* Subtitle */
+  .hero-subtitle {
+    font-size: 2rem;
+    color: #d1d1d1;
+  }
+  
+  /* Hero Text */
+  .hero-text {
+    margin: 20px auto;
+    width: 50%;
+    font-size: 1.2rem;
+    color: #bbb;
+  }
+  
+  /* Hero Buttons */
+  .hero-buttons {
+    margin-top: 30px;
+    display: flex;
+    width: 20%;
+    justify-content: center;
+    gap: 20px;
+    flex-direction: row;
+    white-space: nowrap;
+  }
+  
+  .hero-buttons button {
+    font-size: 1.5rem;
+    border: 2px solid #bbb;
+    border-radius: 5px;
+    background: transparent;
+    color: white;
+    cursor: pointer;
+    transition: all 0.3s ease-in-out;
+  }
+  
+  /* .hero-buttons .get-started {
+    background:#000;
+  } */
+  .hero-buttons .watch-video {
+    background:#000;
+    color: #bbb;
+  }
+  .hero-buttons .watch-video:hover {
+    background: #121212;;
+    color: #000;
+  }
+  
+  .hero-buttons .get-started:hover {
+    background: #121212;
+  }
+  
