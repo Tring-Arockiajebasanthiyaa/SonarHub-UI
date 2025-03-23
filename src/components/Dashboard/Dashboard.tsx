@@ -30,9 +30,24 @@ const Dashboard: React.FC<DashboardProps> = ({ isAuthenticated, setIsAuthenticat
         <header className="header">
           <h4 className="header-title">GitHub</h4>
           <nav className="header-nav">
-          <button className="nav-button" onClick={() => navigate("/github-repos")}>GitHub Repos</button>
-            <button className="nav-button">Features</button>
-            <button className="nav-button">Documentation</button>
+            <button className="nav-button" onClick={() => navigate("/github-repos")}>GitHub Repos</button>
+            <button
+      className="nav-button bg-white text-blue-600 px-4 py-2 rounded-md hover:bg-gray-200"
+      onClick={() => navigate("/sonar-repo")}
+    >
+      View Sonar Reports
+    </button>
+    <button
+      className="nav-button bg-white text-blue-600 px-4 py-2 rounded-md hover:bg-gray-200"
+      onClick={() => {
+        console.log("Navigating to /navbar");
+        navigate("/navbar");
+      }}
+    >
+      Documentation
+    </button>
+
+
             <button className="nav-button outlined">Learn More</button>
             <button className="nav-button logout-button" onClick={handleLogout}>
                 Logout

@@ -1,0 +1,30 @@
+/* SonarRepo.css */
+.sonar-repo {
+    padding: 1rem;
+  }
+  
+  .sonar-repo-title {
+    font-size: 1.5rem;
+    font-weight: bold;
+    margin-bottom: 1rem;
+  }
+  
+  .sonar-repo-card {
+    background-color: white;
+    border-radius: 0.5rem;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    transition: box-shadow 0.3s ease;
+  }
+  
+  .sonar-repo-card:hover {
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+  }
+  
+  .sonar-repo-language {
+    font-size: 0.75rem;
+  }
+  
+  .sonar-repo-stars {
+    font-size: 0.875rem;
+    color: #6b7280;
+  }

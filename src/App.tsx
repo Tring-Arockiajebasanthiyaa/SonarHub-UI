@@ -9,26 +9,28 @@ import LandingPage from "./components/LandingPage/LandingPage";
 import SetPassword from "./components/SignInUp/SetPassword";
 import ForgotPassword from "./components/SignInUp/ForgotPassword";
 import GitHubRepos from "./components/GitHubRepos/GitHubRepos"; 
-
+import RepoDetails from "./components/RepoDetails/RepoDetails";
+import SonarRepo from "./components/SonarRepo/SonarRepo";
+import NavBar from "./components/Navbar/NavBar";
 export default function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-
+  const [userEmail, setUserEmail] = useState("");
+  
   useEffect(() => {
     const token = localStorage.getItem("authToken");
-    setIsAuthenticated(!!token);
-    
-    // Clear token on page refresh or tab close
-    const handleUnload = () => {
-      localStorage.removeItem("authToken");
-    };
+    const email = localStorage.getItem("userEmail");
 
-    window.addEventListener("beforeunload", handleUnload);
+    console.log("Checking authentication...");
+    console.log("Auth Token:", token);
+    console.log("User Email:", email);
 
-    return () => {
-      window.removeEventListener("beforeunload", handleUnload);
-    };
-  }, []);
-
+    if (token) {
+      setIsAuthenticated(true);
+      setUserEmail(email || ""); // Ensure email is set properly
+    } else {
+      setIsAuthenticated(false);
+    }
+  }, []);  
 
   return (
     <ApolloProvider client={client}>
@@ -40,10 +42,11 @@ export default function App() {
           <Route path="/set-password" element={<SetPassword />} />
           <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="/dashboard" element={<Dashboard isAuthenticated={isAuthenticated} setIsAuthenticated={setIsAuthenticated} />} />
-          
           {/* Wrap GitHubRepos in ApolloProvider with GitHub Client */}
           <Route path="/github-repos" element={<GitHubRepos />} />
-
+          <Route path="/sonar-repo" element={<SonarRepo />} />
+          <Route path="/navbar" element={isAuthenticated ? <NavBar /> : <Navigate to="/signin" replace />}/>
+          <Route path="/repo/:repoName" element={<RepoDetails />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </Router>

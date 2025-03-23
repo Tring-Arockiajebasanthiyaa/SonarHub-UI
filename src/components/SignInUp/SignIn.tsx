@@ -17,71 +17,68 @@ export default function SignIn() {
     e.preventDefault();
     try {
       const { data } = await signIn({ variables: { email, password } });
-  
+
       if (data?.signIn) {
         localStorage.setItem("authToken", data.signIn);
+        localStorage.setItem("userEmail", email);
         navigate("/dashboard");
       } else {
         setError("Invalid credentials. Please try again.");
       }
     } catch (err: any) {
+      console.error("Login Error:", err);
       setError(err.message || "Login failed. Please try again.");
     }
   };
-  
 
   return (
     <div className="signin-container">
-    <div className="signin-form">
-      <div className="text-center mb-4">
-        <img
-          src={sonar}
-          alt="SonarHub Logo"
-          className="signin-logo"
-        />
-        <h2 className="mt-3">Sign in to SonarHub</h2>
+      <div className="signin-form">
+        <div className="text-center mb-4">
+          <img src={sonar} alt="SonarHub Logo" className="signin-logo" />
+          <h2 className="mt-3">Sign in to SonarHub</h2>
+        </div>
+        <form onSubmit={handleLogin}>
+          <div className="mb-3">
+            <input
+              type="email"
+              className="form-control"
+              placeholder="Username or email address"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+            />
+          </div>
+          <div className="mb-3">
+            <input
+              type="password"
+              className="form-control"
+              placeholder="Password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+            />
+          </div>
+          <div className="mb-3">
+            <a href="/forgot-password">Forgot password?</a>
+          </div>
+          {error && <p className="error">{error}</p>}
+          <div className="d-grid">
+            <button type="submit" className="btn btn-success">
+              Sign in
+            </button>
+          </div>
+        </form>
+        <div className="text-center mt-3">
+          <a href="/signup">New to SonarHub? Create an account.</a>
+        </div>
       </div>
-      <form onSubmit={handleLogin}>
-        <div className="mb-3">
-          <input
-            type="email"
-            className="form-control"
-            placeholder="Username or email address"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
-          />
-        </div>
-        <div className="mb-3">
-          <input
-            type="password"
-            className="form-control"
-            placeholder="Password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-          />
-        </div>
-        <div className="mb-3">
-          <a href="/forgot-password">Forgot password?</a>
-        </div>
-        {error && <p className="error">{error}</p>}
-        <div className="d-grid">
-          <button type="submit" className="btn btn-success">
-            Sign in
-          </button>
-        </div>
-      </form>
-      <div className="text-center mt-3">
-        <a href="/signup">New to SonarHub? Create an account.</a>
+      <div className="signin-footer">
+        <a href="/terms">Terms</a>
+        <a href="/privacy">Privacy</a>
+        <a href="/security">Security</a>
+        <a href="/contact">Contact SonarHub</a>
       </div>
     </div>
-    <div className="signin-footer">
-      <a href="/terms">Terms</a>
-      <a href="/privacy">Privacy</a>
-      <a href="/security">Security</a>
-      <a href="/contact">Contact SonarHub</a>
-    </div>
-  </div>
   );
-}  
+}

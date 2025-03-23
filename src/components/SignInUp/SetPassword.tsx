@@ -42,7 +42,7 @@ export default function SetPassword() {
         // ✅ Ensure the email is sent before navigating
         await sendPasswordChangeEmail({ variables: { email } });
 
-        navigate("/signin"); // ✅ Redirect to login page
+        navigate("/signin"); 
       }
     } catch (err: any) {
       setError(err.message || "Something went wrong. Please try again.");

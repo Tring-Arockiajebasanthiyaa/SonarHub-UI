@@ -10,9 +10,10 @@ const FORGOT_PASSWORD = gql`
 `;
 
 const RESET_PASSWORD = gql`
-  mutation ResetPassword($email: String!, $newPassword: String!) {
-    resetPassword(email: $email, newPassword: $newPassword)
-  }
+  mutation ResetPassword($token: String!, $newPassword: String!) {
+  resetPassword(token: $token, newPassword: $newPassword)
+}
+
 `;
 
 export default function ForgotPassword() {
@@ -31,12 +32,19 @@ export default function ForgotPassword() {
     e.preventDefault();
     try {
       const { data } = await forgotPassword({ variables: { email } });
+  
       setMessage(data.forgotPassword);
-      setStep("password"); // Move to password step
+      setStep("password"); 
+  
+      // ✅ Store token in localStorage (Assuming API returns it)
+      if (data.token) {
+        localStorage.setItem("authToken", data.token);
+      }
     } catch (err: any) {
       setError(err.message || "Something went wrong. Try again.");
     }
   };
+  
 
   const handlePasswordSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -46,21 +54,32 @@ export default function ForgotPassword() {
       return;
     }
   
+    const token = localStorage.getItem("authToken"); // Retrieve token
+  
+    if (!token) {
+      setError("Invalid or missing reset token.");
+      return;
+    }
+  
     try {
-      const { data } = await resetPassword({ variables: { email, newPassword } });
-      setMessage(data.resetPassword);
+      const { data } = await resetPassword({
+        variables: { token, newPassword },
+      });
+  
+      setMessage("Password reset successful. Redirecting...");
       setError("");
   
-      // ✅ Redirect to the login page after a successful password reset
+      // ✅ Remove token after successful reset
+      localStorage.removeItem("authToken");
+  
       setTimeout(() => {
-        navigate("/signin"); 
-      }, 2000); 
+        navigate("/signin");
+      }, 2000);
     } catch (err: any) {
       setError(err.message || "Something went wrong. Try again.");
     }
   };
   
-
   return (
     <div className="signin-container">
     <div className="signin-form">

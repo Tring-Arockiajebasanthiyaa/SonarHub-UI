@@ -24,7 +24,6 @@ const GITHUB_AUTH = gql`
       isAuthenticated
       user {
         email
-        
       }
       token
     }
