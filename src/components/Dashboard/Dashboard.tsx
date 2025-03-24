@@ -1,96 +1,86 @@
-import React from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
+import { useQuery, useLazyQuery } from "@apollo/client";
+import { GET_USER_ACTIVITY, GET_USER } from "../graphql/queries";
+import { useAuth } from "../../context/AuthContext";
 import "./Dashboard.css";
-import { useMutation, gql } from "@apollo/client";
+import moment from "moment";
 
-interface DashboardProps {
-  isAuthenticated: boolean;
-  setIsAuthenticated: React.Dispatch<React.SetStateAction<boolean>>;
-}
-
-const Dashboard: React.FC<DashboardProps> = ({ isAuthenticated, setIsAuthenticated }) => {
+const Dashboard: React.FC = () => {
   const navigate = useNavigate();
+  const { userEmail } = useAuth();
+  const [githubUsername, setGithubUsername] = useState<string | null>(null);
 
-  const handleLogout = () => {
-    // Clear authentication data
-    localStorage.removeItem("authToken");
+  useEffect(() => {
+    if (!userEmail) navigate("/signin");
+  }, [userEmail, navigate]);
 
-    // Update authentication state
-    setIsAuthenticated(false);
+ 
+  const { data: userData } = useQuery(GET_USER, {
+    variables: { email: userEmail },
+    skip: !userEmail,
+  });
 
-    // Redirect to landing page
-    navigate("/", { replace: true });
-  };
+  
+  const [fetchUserActivity, { data, loading }] = useLazyQuery(GET_USER_ACTIVITY);
 
+  useEffect(() => {
+    if (userData?.getUserByEmail) {
+      setGithubUsername(userData.getUserByEmail.username);
+    }
+  }, [userData]);
 
+  useEffect(() => {
+    if (githubUsername) {
+      fetchUserActivity({ variables: { githubUsername } });
+    }
+  }, [githubUsername, fetchUserActivity]);
+
+  const userActivity = useMemo(() => data?.getUserActivity || {}, [data]);
+
+  const githubActivities = useMemo(
+    () => [
+      { title: "Total Commits", data: userActivity.totalCommits || 0 },
+      { title: "Last Active", data: moment(userActivity.lastActive).format("MM-DD-YYYY") || "-" },
+      { title: "Total Repositories", data: userActivity.totalRepositories || 0 },
+      { title: "Total Stars", data: userActivity.totalStars || 0 },
+      { title: "Total Forks", data: userActivity.totalForks || 0 },
+      { title: "Public Repo Count", data: userActivity.publicRepoCount || 0 },
+      { title: "Private Repo Count", data: userActivity.privateRepoCount || 0 },
+      { title: "Top Contributed Repo", data: userActivity.topContributedRepo || "-" },
+      { title: "Sonar Issues", data: userActivity.sonarIssues || "-" },
+      { title: "Issue Percentage (%)", data: userActivity.issuePercentage || "0%" },
+      { title: "Danger Level", data: userActivity.dangerLevel || "Low" },
+      {
+        title: "Languages Used",
+        data: (
+          <ul className="languages-list">
+            {userActivity.languagesUsed?.length > 0 ? (
+              userActivity.languagesUsed.map((language: string, index: number) => (
+                <li key={index}>{language}</li>
+              ))
+            ) : (
+              <li>-</li>
+            )}
+          </ul>
+        ),
+      },
+    ],
+    [userActivity]
+  );
 
   return (
-    <div className="landing-page">
-      <div className="container">
-        <header className="header">
-          <h4 className="header-title">GitHub</h4>
-          <nav className="header-nav">
-            <button className="nav-button" onClick={() => navigate("/github-repos")}>GitHub Repos</button>
-            <button
-      className="nav-button bg-white text-blue-600 px-4 py-2 rounded-md hover:bg-gray-200"
-      onClick={() => navigate("/sonar-repo")}
-    >
-      View Sonar Reports
-    </button>
-    <button
-      className="nav-button bg-white text-blue-600 px-4 py-2 rounded-md hover:bg-gray-200"
-      onClick={() => {
-        console.log("Navigating to /navbar");
-        navigate("/navbar");
-      }}
-    >
-      Documentation
-    </button>
-
-
-            <button className="nav-button outlined">Learn More</button>
-            <button className="nav-button logout-button" onClick={handleLogout}>
-                Logout
-              </button>
-          </nav>
-        </header>
-
-        <div className="content-grid">
-          <div className="card">
-            <div className="placeholder"></div>
-            <h6 className="card-title">Feature Collaboration</h6>
-            <p className="card-text">Collaborate on features with your team seamlessly.</p>
+    <div className="page-content">
+      <header className="header">
+        <h4 className="header-title">GitHub Activity Dashboard</h4>
+      </header>
+      <div className="card-grid">
+        {githubActivities.map((activity, index) => (
+          <div className="card" key={index}>
+            <h6 className="card-title">{activity.title}</h6>
+            <p className="card-data">{loading ? "Loading..." : activity.data}</p>
           </div>
-
-          <div className="card-grid">
-            <div className="card">
-              <div className="placeholder small"></div>
-              <h6 className="card-title">Hero</h6>
-              <p className="card-text">Your personal development space.</p>
-              <button className="card-button">Explore</button>
-            </div>
-
-            <div className="card">
-              <div className="placeholder small"></div>
-              <h6 className="card-title">Team Collaboration</h6>
-              <p className="card-text">Work together with your team on projects.</p>
-              <button className="card-button">Join Team</button>
-            </div>
-
-            <div className="card">
-              <div className="placeholder small"></div>
-              <h6 className="card-title">Community</h6>
-              <p className="card-text">Connect with developers worldwide.</p>
-              <button className="card-button">Join Community</button>
-            </div>
-          </div>
-
-          <div className="card">
-            <div className="placeholder"></div>
-            <h6 className="card-title">Tools</h6>
-            <p className="card-text">Access developer tools and resources.</p>
-          </div>
-        </div>
+        ))}
       </div>
     </div>
   );

@@ -1,108 +1,94 @@
-.landing-page {
-    background-color: #161b22;
-    color: #c9d1d9;
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    padding: 2rem 0;
-    font-family: sans-serif;
-  }
-  
-  .container {
-    max-width: 1200px;
-    width: 90%;
-    text-align: center;
-  }
-  
-  .header {
-    margin-bottom: 2rem;
-  }
-  
-  .header-title {
-    font-weight: bold;
-    font-size: 1.5rem;
-    margin: 0;
-  }
-  
-  .header-nav {
-    display: flex;
-    justify-content: center;
-    margin-top: 1rem;
-  }
-  
-  .nav-button {
-    background-color: transparent;
-    border: none;
-    color: #c9d1d9;
-    padding: 0.5rem 1rem;
-    margin: 0 0.5rem;
-    cursor: pointer;
-  }
-  
-  .nav-button.outlined {
-    border: 1px solid #30363d;
-    color: #58a6ff;
-  }
-  
-  .content-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 2rem;
-  }
-  
-  .card {
-    background-color: #0d1117;
-    padding: 1.5rem;
-    border-radius: 8px;
-  }
-  
-  .card-title {
-    font-weight: bold;
-    margin-bottom: 0.5rem;
-    font-size: 1.1rem;
-    margin: 0;
-  }
-  
-  .card-text {
-    font-size: 0.9rem;
-    line-height: 1.4;
-    margin: 0;
-  }
-  
-  .placeholder {
-    height: 200px;
-    background-color: #30363d;
-    margin-bottom: 1rem;
-  }
-  
-  .placeholder.small {
-    height: 150px;
-  }
-  
-  .card-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr 1fr;
-    gap: 2rem;
-  }
-  
-  .card-button {
-    background-color: #58a6ff;
-    border: none;
-    color: white;
-    padding: 0.5rem 1rem;
-    border-radius: 4px;
-    margin-top: 1rem;
-    cursor: pointer;
-  }
-  
-  /* Bootstrap-like container */
-  .container {
-    width: 100%;
-    padding-right: 15px;
-    padding-left: 15px;
-    margin-right: auto;
-    margin-left: auto;
-  }
-  
-  /* Add media queries for responsiveness if needed */
+body {
+  margin: 0;
+  font-family: sans-serif;
+  background-color: #161b22;
+  color: #c9d1d9;
+}
+
+.dashboard-container {
+  display: flex;
+  min-height: 100vh;
+}
+
+
+.sidebar {
+  width: 250px;
+  background-color: #0d1117;
+  padding: 1.5rem;
+  position: fixed;
+  height: 100vh;
+  left: 0;
+  top: 0;
+  border-right: 1px solid #30363d;
+}
+
+
+.main-content {
+  margin-left: 250px;
+  padding: 2rem;
+  width: calc(100% - 250px);
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+
+.page-content {
+  flex-grow: 1;
+}
+
+.header {
+  margin-bottom: 2rem;
+}
+
+.header-title {
+  font-weight: bold;
+  font-size: 1.5rem;
+  margin: 0;
+}
+
+
+.card-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 2rem;text-align: cen
+}
+
+.card {
+  background-color: #0d1117;
+  padding: 1.5rem;
+  border-radius: 8px;
+  border: 2px solid #58a6ff;
+  text-align: center;
+  box-shadow: 0 0 10px rgba(88, 166, 255, 0.5);
+}
+
+.card-title {
+  font-weight: bold;
+  margin-bottom: 0.5rem;
+  color: #58a6ff;
+}
+
+.card-data {
+  font-size: 1.2rem;
+  color: #c9d1d9;
+}
+
+.languages-list {
+  margin: 0;
+  padding-left: 0;
+  list-style-type: disc;
+  list-style-position: inside;
+  display: flex;
+  flex-direction: column;
+  align-items: right;
+}
+
+.languages-list li {
+  margin: 0;
+  padding: 2px 0;
+  margin-left: 20%;
+  display: list-item;
+  width: fit-content;
+  align-items: right;
+}

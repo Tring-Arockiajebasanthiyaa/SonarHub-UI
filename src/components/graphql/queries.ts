@@ -1,0 +1,128 @@
+import { gql } from "@apollo/client";
+
+export const CHECK_AUTH = gql`
+  query CheckAuth {
+    checkAuth {
+      isAuthenticated
+      user {
+        email
+      }
+    }
+  }
+`;
+
+
+export const VALIDATE_AUTH = gql`
+  query  validateAuth($onlyStatus: Boolean) {
+     validateAuth(onlyStatus: $onlyStatus) {
+      isAuthenticated
+      user {
+        email
+      }
+      token
+    }
+  }
+`;
+
+export const GET_USER_REPOSITORIES = gql`
+  query GetUserRepositories($username: String!) {
+    user(login: $username) {
+      repositories(first: 10, orderBy: { field: UPDATED_AT, direction: DESC }) {
+        nodes {
+          name
+          url
+          stargazerCount
+        }
+      }
+    }
+  }
+`;
+
+export const GET_USER_ACTIVITY = gql`
+  query getUserActivity($githubUsername: String!) {
+    getUserActivity(githubUsername: $githubUsername) {
+      u_id
+      githubUsername
+      commitHistory
+      repoCommits
+      totalRepositories
+      totalCommits
+      totalForks
+      totalStars
+      publicRepoCount
+      privateRepoCount
+      languagesUsed
+      topContributedRepo
+      earliestRepoCreatedAt
+      mostRecentlyUpdatedRepo
+      lastActive
+      createdAt
+      updatedAt
+      sonarIssues 
+      issuePercentage
+      dangerLevel
+    }
+  }
+`;
+
+export const GET_REPOSITORIES = gql`
+  query GetUserRepositories($username: String!) {
+    getUserRepositories(username: $username) {
+      name
+      owner
+    }
+  }
+`;
+
+export const GET_USER = gql`
+query GetUserByEmail($email: String!) {
+  getUserByEmail(email: $email) {
+    name
+    username
+  }
+}
+`;
+export const GET_SCAN_RESULTS = gql`
+  query GetUserScanResults($username: String!) {
+    getUserScanResults(username: $username) {
+      totalBugs
+      vulnerabilities
+      codeSmells
+      duplications
+      timestamp
+    }
+  }
+`;
+
+export const SET_PASSWORD = gql`
+mutation SetPassword($email: String!, $password: String!) {
+setPassword(email: $email, password: $password)
+}
+
+`;
+
+
+export const SEND_PASSWORD_CHANGE_EMAIL = gql`
+mutation SendPasswordChangeEmail($email: String!) {
+  sendPasswordChangeEmail(email: $email)
+}
+`;
+
+export const SAVE_SONAR_ISSUES = gql`
+mutation SaveSonarIssues($githubUsername: String!, $repoName: String!, $issues: [SonarIssueInput!]!) {
+  saveSonarIssues(githubUsername: $githubUsername, repoName: $repoName, issues: $issues)
+}
+`;
+
+export const GET_SONAR_ISSUES = gql`
+query GetSonarIssues($githubUsername: String!, $repoName: String!) {
+  getSonarIssues(githubUsername: $githubUsername, repoName: $repoName) {
+    issueType
+    severity
+    message
+    rule
+    component
+  }
+}
+`;
+

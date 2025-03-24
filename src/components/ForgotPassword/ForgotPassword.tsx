@@ -1,20 +1,10 @@
 import React, { useState } from "react";
-import { gql, useMutation } from "@apollo/client";
-import "./SignIn.css";
+import { useMutation } from "@apollo/client";
+import "./ForgotPassword.css";
 import { useNavigate } from "react-router-dom";
 import sonar from "../../assets/logo.webp";
-const FORGOT_PASSWORD = gql`
-  mutation ForgotPassword($email: String!) {
-    forgotPassword(email: $email)
-  }
-`;
+import {FORGOT_PASSWORD,RESET_PASSWORD} from "../graphql/mutations";
 
-const RESET_PASSWORD = gql`
-  mutation ResetPassword($token: String!, $newPassword: String!) {
-  resetPassword(token: $token, newPassword: $newPassword)
-}
-
-`;
 
 export default function ForgotPassword() {
   const [email, setEmail] = useState("");
@@ -36,7 +26,7 @@ export default function ForgotPassword() {
       setMessage(data.forgotPassword);
       setStep("password"); 
   
-      // ✅ Store token in localStorage (Assuming API returns it)
+      
       if (data.token) {
         localStorage.setItem("authToken", data.token);
       }
@@ -68,8 +58,6 @@ export default function ForgotPassword() {
   
       setMessage("Password reset successful. Redirecting...");
       setError("");
-  
-      // ✅ Remove token after successful reset
       localStorage.removeItem("authToken");
   
       setTimeout(() => {

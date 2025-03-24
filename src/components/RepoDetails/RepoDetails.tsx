@@ -1,76 +1,69 @@
-import { useQuery, gql } from "@apollo/client";
+import { useMutation, useQuery} from "@apollo/client";
 import { useParams } from "react-router-dom";
+import { useAuth } from "../../context/AuthContext";
+import { useEffect, useState } from "react";
+import {GET_USER ,SAVE_SONAR_ISSUES, GET_SONAR_ISSUES} from "../graphql/queries";
 
-const GET_SONARQUBE_ANALYSIS = gql`
-  query GetSonarQubeAnalysis($projectKey: String!) {
-    getSonarQubeAnalysis(projectKey: $projectKey) {
-      issues
-      codeSmells
-      suggestions
-    }
-  }
-`;
+interface SonarIssue {
+  issueType: string;
+  severity: string;
+  message: string;
+  rule: string;
+  component: string;
+}
 
 const RepoDetails = () => {
   const { repoName } = useParams();
-  const { data, loading, error } = useQuery(GET_SONARQUBE_ANALYSIS, { variables: { projectKey: repoName } });
+  const { userEmail } = useAuth();
+  const [githubUsername, setGithubUsername] = useState<string | null>(null);
+  const [issuesStored, setIssuesStored] = useState(false);
 
-  if (loading) return <p>Loading SonarQube analysis...</p>;
-  if (error) return <p>Error fetching SonarQube data: {error.message}</p>;
+  const { data: userData } = useQuery(GET_USER, {
+    variables: { email: userEmail },
+    skip: !userEmail,
+  });
 
-  const analysisData = data?.getSonarQubeAnalysis;
-  const issues = analysisData?.issues ? JSON.parse(analysisData.issues) : [];
-  const codeSmells = analysisData?.codeSmells ? JSON.parse(analysisData.codeSmells) : [];
-  const suggestions = analysisData?.suggestions ? JSON.parse(analysisData.suggestions) : [];
+  useEffect(() => {
+    if (userData?.getUserByEmail?.username) {
+      setGithubUsername(userData.getUserByEmail.username);
+    }
+  }, [userData]);
+
+  const [saveSonarIssues] = useMutation(SAVE_SONAR_ISSUES);
+
+  useEffect(() => {
+    if (githubUsername && repoName && !issuesStored) {
+      fetch(`${import.meta.env.VITE_BACKEND_URL}/fetch-sonar-issues?githubUsername=${githubUsername}&repoName=${repoName}`)
+        .then((res) => res.json())
+        .then((issues: SonarIssue[]) => {
+          if (issues.length > 0) {
+            saveSonarIssues({ variables: { githubUsername, repoName, issues } }).then(() => {
+              setIssuesStored(true);
+            });
+          }
+        })
+        .catch((error) => console.error("Error fetching SonarQube issues:", error));
+    }
+  }, [githubUsername, repoName, saveSonarIssues, issuesStored]);
+
+  const { data } = useQuery<{ getSonarIssues: SonarIssue[] }>(GET_SONAR_ISSUES, {
+    variables: { githubUsername, repoName },
+    skip: !githubUsername || !repoName || !issuesStored,
+  });
+
+  const issues = data?.getSonarIssues ?? [];
 
   return (
     <div className="p-6">
-      <h1 className="text-2xl font-bold mb-4">SonarQube Analysis for {repoName}</h1>
-
-      {/* Issues Section */}
-      <h2 className="text-xl font-semibold mb-2">Issues</h2>
-      {issues.length === 0 ? (
+      <h1 className="text-2xl font-bold">SonarQube Issues for {repoName}</h1>
+      {issues.length > 0 ? (
+        <ul>
+          {issues.map((issue: SonarIssue, index: number) => (
+            <li key={index}>{issue.message} ({issue.severity})</li>
+          ))}
+        </ul>
+      ) : (
         <p>No issues found.</p>
-      ) : (
-        <ul className="space-y-4">
-          {issues.map((issue: any, index: number) => (
-            <li key={index} className="p-4 bg-gray-100 rounded-lg">
-              <strong>{issue.message}</strong>
-              <p>Severity: {issue.severity}</p>
-              <p>Type: {issue.type}</p>
-            </li>
-          ))}
-        </ul>
-      )}
-
-      {/* Code Smells Section */}
-      <h2 className="text-xl font-semibold mt-6 mb-2">Code Smells</h2>
-      {codeSmells.length === 0 ? (
-        <p>No code smells found.</p>
-      ) : (
-        <ul className="space-y-4">
-          {codeSmells.map((smell: any, index: number) => (
-            <li key={index} className="p-4 bg-yellow-100 rounded-lg">
-              <strong>{smell.message}</strong>
-              <p>Severity: {smell.severity}</p>
-            </li>
-          ))}
-        </ul>
-      )}
-
-      {/* Suggestions Section */}
-      <h2 className="text-xl font-semibold mt-6 mb-2">Suggestions for Improvement</h2>
-      {suggestions.length === 0 ? (
-        <p>No suggestions found.</p>
-      ) : (
-        <ul className="space-y-4">
-          {suggestions.map((suggestion: any, index: number) => (
-            <li key={index} className="p-4 bg-green-100 rounded-lg">
-              <strong>{suggestion.rule}</strong>
-              <p>{suggestion.message}</p>
-            </li>
-          ))}
-        </ul>
       )}
     </div>
   );

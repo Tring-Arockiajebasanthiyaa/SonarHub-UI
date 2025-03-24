@@ -1,24 +1,10 @@
 import React, { useState } from "react";
-import { gql, useMutation } from "@apollo/client";
+import { useMutation } from "@apollo/client";
 import { useNavigate } from "react-router-dom";
 import "./SetPassword.css";
 import "bootstrap/dist/css/bootstrap.min.css";
 import sonar from "../../assets/logo.webp";
-
-// GraphQL Mutation for setting password
-const SET_PASSWORD = gql`
-  mutation SetPassword($email: String!, $password: String!) {
-  setPassword(email: $email, password: $password)
-}
-
-`;
-
-// GraphQL Mutation for sending password change email
-const SEND_PASSWORD_CHANGE_EMAIL = gql`
-  mutation SendPasswordChangeEmail($email: String!) {
-    sendPasswordChangeEmail(email: $email)
-  }
-`;
+import { SET_PASSWORD, SEND_PASSWORD_CHANGE_EMAIL } from "../graphql/queries";
 
 export default function SetPassword() {
   const [password, setPassword] = useState("");
@@ -30,19 +16,18 @@ export default function SetPassword() {
   const [sendPasswordChangeEmail] = useMutation(SEND_PASSWORD_CHANGE_EMAIL);
 
   const handleSetPassword = async (e: React.FormEvent) => {
-    e.preventDefault(); // Prevents form refresh
+    e.preventDefault();
 
     try {
-      // Call GraphQL mutation to set password
-      const { data } = await setPasswordMutation({ variables: { email, password } });
+      const { data } = await setPasswordMutation({
+        variables: { email, password },
+      });
 
-      if (data?.setPassword) { 
-        alert(data.setPassword);      
+      if (data?.setPassword) {
+        alert(data.setPassword);
 
-        // ✅ Ensure the email is sent before navigating
         await sendPasswordChangeEmail({ variables: { email } });
-
-        navigate("/signin"); 
+        navigate("/signin");
       }
     } catch (err: any) {
       setError(err.message || "Something went wrong. Please try again.");
@@ -50,8 +35,8 @@ export default function SetPassword() {
   };
 
   return (
-    <div className="signin-container">
-      <div className="top-right-button">
+    <div className="bg-dark d-flex align-items-center justify-content-center vh-100">
+      <div className="position-absolute top-0 end-0 m-3">
         <button
           type="button"
           onClick={() => navigate("/")}
@@ -60,10 +45,10 @@ export default function SetPassword() {
           Go Back
         </button>
       </div>
-      <div className="signin-form">
+      <div className="signin-form p-4 rounded shadow">
         <div className="text-center mb-4">
-          <img src={sonar} alt="SonarHub Logo" className="signin-logo" />
-          <h2 className="mt-3">Set Your Password</h2>
+          <img src={sonar} alt="SonarHub Logo" className="signin-logo mb-3" />
+          <h2 className="text-white">Set Your Password</h2>
         </div>
         <form onSubmit={handleSetPassword}>
           <div className="mb-3">
@@ -86,7 +71,7 @@ export default function SetPassword() {
               required
             />
           </div>
-          {error && <p className="error">{error}</p>}
+          {error && <p className="text-danger text-center mb-3">{error}</p>}
           <div className="d-grid mb-3">
             <button type="submit" className="btn btn-success">
               Set Password

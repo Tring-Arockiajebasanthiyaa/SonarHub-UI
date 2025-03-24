@@ -4,7 +4,7 @@ import { useQuery, gql } from "@apollo/client";
 import "./LandingPage.css";
 import logo from "../../assets/logo.webp";
 
-// Define GraphQL query
+
 const CHECK_AUTH = gql`
   query CheckAuth($onlyStatus: Boolean) {
     checkAuth(onlyStatus: $onlyStatus) {

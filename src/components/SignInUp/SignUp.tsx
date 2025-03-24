@@ -50,7 +50,6 @@ export default function SignUp() {
   }, [data, navigate]);
 
   useEffect(() => {
-    // Check if the user is redirected back from GitHub
     const urlParams = new URLSearchParams(window.location.search);
     const code = urlParams.get("code");
 
@@ -75,11 +74,10 @@ export default function SignUp() {
   }, [githubAuth, navigate]);
 
   const handleGitHubSignup = () => {
-    const clientId = "Ov23liwVPCtND4vUVfuG"; // Replace with your GitHub OAuth App Client ID
-    const redirectUri = "http://localhost:4000/auth/github/callback";
+    const clientId = import.meta.env.VITE_CLIENT_ID; 
+    const redirectUri = import.meta.env.VITE_BACKEND_AUTH_URL || " ";
     const githubAuthUrl = `https://github.com/login/oauth/authorize?client_id=${clientId}&redirect_uri=${encodeURIComponent(redirectUri)}&scope=user:email`;
 
-    // Redirect to GitHub's OAuth page
     window.location.href = githubAuthUrl;
   };
 

@@ -1,0 +1,82 @@
+.github-repos-container {
+    padding: 2rem;
+    background-color: #161b22;
+    color: #c9d1d9;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
+    max-width: 1800px;
+    margin: 2rem auto;
+  }
+  
+  .github-repos-title {
+    font-size: 2rem;
+    font-weight: bold;
+    margin-bottom: 2rem;
+    color: #58a6ff;
+    text-align: center;
+  }
+  
+  .github-search-container {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 2rem;
+  }
+  
+  .github-search-input {
+    flex-grow: 1;
+    padding: 0.75rem;
+    border: 1px solid #30363d;
+    border-radius: 4px;
+    background-color: #0d1117;
+    color: #c9d1d9;
+  }
+  
+  .github-search-button {
+    background-color: #58a6ff;
+    color: white;
+    padding: 0.75rem 1.5rem;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+  }
+  
+  .github-search-button:hover {
+    background-color: #3d8bf2;
+  }
+  
+  .github-loading,
+  .github-error {
+    text-align: center;
+    margin-top: 1rem;
+  }
+  
+  .github-error {
+    color: #ff4d4d;
+  }
+  
+  .github-repos-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+  
+  .github-repo-item {
+    background-color: #0d1117;
+    border: 1px solid #30363d;
+    padding: 1rem;
+    border-radius: 4px;
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  
+  .github-repo-link {
+    color: #58a6ff;
+    text-decoration: none;
+  }
+  
+  .github-repo-link:hover {
+    text-decoration: underline;
+  }

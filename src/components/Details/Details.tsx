@@ -1,18 +1,7 @@
-import { useQuery, gql } from "@apollo/client";
+import { useQuery } from "@apollo/client";
 import { PieChart, Pie, Tooltip, Cell } from "recharts";
 import { useState } from "react";
-
-const GET_SCAN_RESULTS = gql`
-  query GetUserScanResults($username: String!) {
-    getUserScanResults(username: $username) {
-      totalBugs
-      vulnerabilities
-      codeSmells
-      duplications
-      timestamp
-    }
-  }
-`;
+import { GET_SCAN_RESULTS} from "../graphql/queries"
 
 const COLORS = ["#FF5733", "#33FF57", "#5733FF", "#FFD700"];
 
