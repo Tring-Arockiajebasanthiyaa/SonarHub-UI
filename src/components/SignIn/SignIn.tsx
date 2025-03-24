@@ -48,40 +48,38 @@ export default function SignIn() {
   };
 
   return (
-    <div className="signin-container d-flex align-items-center justify-content-center vh-100 bg-dark">
-      <div className="signin-form p-4 rounded shadow bg-dark border border-primary">
+    <div className="signin-container">
+      <div className="signin-form">
         <div className="text-center mb-4">
-          <img src={sonar} alt="SonarHub Logo" className="signin-logo mb-3" />
-          <h2 className="text-white">Sign in to SonarHub</h2>
+          <img src={sonar} alt="SonarHub Logo" className="signin-logo" />
+          <h2 className="mt-3">Sign in to SonarHub</h2>
         </div>
 
         <form onSubmit={handleSubmit(handleLogin)}>
           <div className="mb-3">
             <input
               type="email"
-              className="form-control bg-dark text-white border-primary"
+              className="form-control"
               placeholder="Username or email address"
               {...register("email", { required: "Email is required" })}
             />
-            {errors.email && <p className="text-danger">{errors.email.message}</p>}
+            {errors.email && <p className="error">{errors.email.message}</p>}
           </div>
 
           <div className="mb-3">
             <input
               type="password"
-              className="form-control bg-dark text-white border-primary"
+              className="form-control"
               placeholder="Password"
               {...register("password", { required: "Password is required" })}
             />
             {errors.password && (
-              <p className="text-danger">{errors.password.message}</p>
+              <p className="error">{errors.password.message}</p>
             )}
           </div>
 
           <div className="mb-3">
-            <a href="/forgot-password" className="text-primary">
-              Forgot password?
-            </a>
+            <a href="/forgot-password">Forgot password?</a>
           </div>
 
           <div className="d-grid">
@@ -92,17 +90,15 @@ export default function SignIn() {
         </form>
 
         <div className="text-center mt-3">
-          <a href="/signup" className="text-primary">
-            New to SonarHub? Create an account.
-          </a>
+          <a href="/signup">New to SonarHub? Create an account.</a>
         </div>
       </div>
 
-      <div className="signin-footer mt-3 text-center text-secondary">
-        <a href="/terms" className="mx-2 text-secondary">Terms</a>
-        <a href="/privacy" className="mx-2 text-secondary">Privacy</a>
-        <a href="/security" className="mx-2 text-secondary">Security</a>
-        <a href="/contact" className="mx-2 text-secondary">Contact SonarHub</a>
+      <div className="signin-footer">
+        <a href="/terms">Terms</a>
+        <a href="/privacy">Privacy</a>
+        <a href="/security">Security</a>
+        <a href="/contact">Contact SonarHub</a>
       </div>
     </div>
   );

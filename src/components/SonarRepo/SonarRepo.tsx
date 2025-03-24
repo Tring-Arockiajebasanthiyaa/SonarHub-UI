@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import React,{useState,useEffect} from "react";
 import { GET_REPOSITORIES} from "../graphql/queries";
 import "./SonarRepo.css";
+
 const GET_USER = gql`
 query GetUserByEmail($email: String!) {
   getUserByEmail(email: $email) {
@@ -49,7 +50,7 @@ const SonarRepo = () => {
           <div
             key={repo.name}
             className="sonar-repo-card"
-            onClick={() => navigate(`/repo/${repo.name}`)}
+            onClick={() => navigate(`/dashboard/repo/${repo.name}`)          }
           >
             <h2 className="sonar-repo-name">{repo.name}</h2>
             <p className="sonar-repo-owner">Owned by {repo.owner}</p>
