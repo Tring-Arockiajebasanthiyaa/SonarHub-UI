@@ -1,9 +1,8 @@
-import React ,{useEffect,useState} from "react";
+import React, { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useQuery, gql } from "@apollo/client";
 import "./LandingPage.css";
 import logo from "../../assets/logo.webp";
-
 
 const CHECK_AUTH = gql`
   query CheckAuth($onlyStatus: Boolean) {
@@ -17,14 +16,12 @@ const CHECK_AUTH = gql`
   }
 `;
 
-
 const LandingPage: React.FC = () => {
   const navigate = useNavigate();
   const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
   const { data, loading, error } = useQuery(CHECK_AUTH, {
     variables: { onlyStatus: true },
   });
-  
 
   useEffect(() => {
     if (!loading && !error && data?.checkAuth) {
@@ -34,15 +31,15 @@ const LandingPage: React.FC = () => {
       }
     }
   }, [data, loading, error, navigate]);
-  
+
   return (
     <div className="landing-container">
       <nav className="navbar">
         <img src={logo} alt="SonarHub Logo" className="logo-img" />
         <div className="auth-buttons">
-          <Link to="/" className="authbuttons">Home</Link>
-          <Link to="/signin" className="authbuttons">Sign In</Link>
-          <Link to="/signup" className="authbuttons">Sign Up</Link>
+          <Link to="/" className="nav-link">Home</Link>
+          <Link to="/signin" className="nav-link signin">Sign In</Link>
+          <Link to="/signup" className="nav-link signup">Sign Up</Link>
         </div>
       </nav>
 

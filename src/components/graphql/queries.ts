@@ -68,11 +68,15 @@ export const GET_USER_ACTIVITY = gql`
 export const GET_REPOSITORIES = gql`
   query GetUserRepositories($username: String!) {
     getUserRepositories(username: $username) {
-      name
-      owner
+       name
+    owner
+    language
+    stars
+    totalCommits
     }
   }
 `;
+
 
 export const GET_USER = gql`
 query GetUserByEmail($email: String!) {

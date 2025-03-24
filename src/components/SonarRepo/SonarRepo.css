@@ -1,53 +1,51 @@
 .sonar-repo {
   padding: 2rem;
-  color: #c9d1d9; 
+  color: #c9d1d9;
+  background-color: #121212; 
 }
 
 .sonar-repo-title {
-  font-size: 2rem;
-  font-weight: bold;
-  margin-bottom: 2rem;
-  color: #58a6ff; 
-  text-align: center;
-}
-
-.sonar-repo-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  gap: 1.5rem;
-}
-
-.sonar-repo-card {
-  background-color: #0d1117; 
-  border-radius: 0.5rem;
-  padding: 1.5rem;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.4); 
-  transition: box-shadow 0.3s ease;
-  cursor: pointer;
-  border: 1px solid #30363d; 
-}
-.sonar-repo-card:hover {
-  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.6); 
-}
-
-.sonar-repo-name {
-  font-size: 1.25rem;
-  font-weight: bold;
-  margin-bottom: 0.5rem;
   color: #58a6ff;
+  margin-bottom: 1.5rem;
 }
 
-.sonar-repo-owner,
-.sonar-repo-language,
-.sonar-repo-stars {
-  font-size: 0.9rem;
-  color: #c9d1d9;
-  margin-bottom: 0.5rem;
+.sonar-repo-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 20px;
+  background-color: #1e1e1e; 
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
 }
 
-.loading-text,
-.error-text {
-  color: #ff4d4d; 
+.sonar-repo-table th,
+.sonar-repo-table td {
+  border-bottom: 1px solid #30363d;
+  padding: 12px 15px;
+  text-align: left;
+}
+
+.sonar-repo-table th {
+  background-color: #333; 
+  color: #58a6ff;
+  font-weight: 600;
+}
+
+.clickable-row {
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.clickable-row:hover {
+  background-color: #272e35;
+}
+
+.details-cell {
   text-align: center;
-  margin-top: 2rem;
+}
+
+.arrow-icon {
+  color: #58a6ff;
+  font-size: 1.2rem;
 }

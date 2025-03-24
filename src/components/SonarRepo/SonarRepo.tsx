@@ -1,41 +1,40 @@
-import { useQuery,gql } from "@apollo/client";
+import React, { useState, useEffect } from "react";
+import { useQuery, gql } from "@apollo/client";
 import { useAuth } from "../../context/AuthContext";
 import { useNavigate } from "react-router-dom";
-import React,{useState,useEffect} from "react";
-import { GET_REPOSITORIES} from "../graphql/queries";
+import { GET_REPOSITORIES } from "../graphql/queries";
 import "./SonarRepo.css";
+import { motion } from "framer-motion";
+import { FaArrowRight } from "react-icons/fa";
 
 const GET_USER = gql`
-query GetUserByEmail($email: String!) {
-  getUserByEmail(email: $email) {
-    name
-    username
+  query GetUserByEmail($email: String!) {
+    getUserByEmail(email: $email) {
+      name
+      username
+    }
   }
-}
 `;
 
 const SonarRepo = () => {
-  const { userEmail } = useAuth(); 
+  const { userEmail } = useAuth();
   const navigate = useNavigate();
   const [githubUsername, setGithubUsername] = useState<string | null>(null);
 
-  console.log(userEmail);
   const { data: userData, loading: userLoading, error: userError } = useQuery(GET_USER, {
     variables: { email: userEmail },
-    skip: !userEmail, 
+    skip: !userEmail,
   });
-  console.log(userEmail);
-  console.log(userData);
+
   useEffect(() => {
     if (userData?.getUserByEmail) {
       setGithubUsername(userData.getUserByEmail.username);
     }
   }, [userData]);
-  console.log(githubUsername);
 
   const { data, loading, error } = useQuery(GET_REPOSITORIES, {
     variables: { username: githubUsername },
-    skip: !githubUsername, 
+    skip: !githubUsername,
   });
 
   if (userLoading || loading) return <p>Loading...</p>;
@@ -43,23 +42,51 @@ const SonarRepo = () => {
   if (error) return <p>Error fetching repositories: {error.message}</p>;
 
   return (
-    <div className="sonar-repo">
+    <motion.div
+      className="sonar-repo"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.5 }}
+    >
       <h1 className="sonar-repo-title">SonarHub Repositories</h1>
-      <div className="sonar-repo-grid">
-        {data?.getUserRepositories.map((repo: any) => (
-          <div
-            key={repo.name}
-            className="sonar-repo-card"
-            onClick={() => navigate(`/dashboard/repo/${repo.name}`)          }
-          >
-            <h2 className="sonar-repo-name">{repo.name}</h2>
-            <p className="sonar-repo-owner">Owned by {repo.owner}</p>
-            <p className="sonar-repo-language">Language: {repo.language || "N/A"}</p>
-            <p className="sonar-repo-stars">Stars: {repo.stars || 0}</p>
-          </div>
-        ))}
-      </div>
-    </div>
+      <motion.table
+        className="sonar-repo-table"
+        initial={{ y: 20, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        transition={{ duration: 0.5, delay: 0.2 }}
+      >
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Owner</th>
+            <th>Language</th>
+            <th>Stars</th>
+            <th>Total Commits</th>
+            <th>Details</th>
+          </tr>
+        </thead>
+        <tbody>
+          {data?.getUserRepositories.map((repo: any) => (
+            <motion.tr
+              key={repo.name}
+              onClick={() => navigate(`/dashboard/repo/${repo.name}`)}
+              className="clickable-row"
+              whileHover={{ backgroundColor: "#272e35", transition: { duration: 0.3 } }}
+              transition={{ duration: 0.2 }}
+            >
+              <td>{repo.name}</td>
+              <td>{repo.owner}</td>
+              <td>{repo.language || "-"}</td>
+              <td>{repo.stars || 0}</td>
+              <td>{repo.totalCommits || 0}</td>
+              <td className="details-cell">
+                <FaArrowRight className="arrow-icon" />
+              </td>
+            </motion.tr>
+          ))}
+        </tbody>
+      </motion.table>
+    </motion.div>
   );
 };
 
