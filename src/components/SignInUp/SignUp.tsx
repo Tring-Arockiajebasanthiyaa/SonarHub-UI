@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { gql, useMutation, useQuery } from "@apollo/client";
 import "./styles.css";
 
-// GraphQL Query to Check Authentication
+
 const CHECK_AUTH = gql`
   query CheckAuth {
     checkAuth {
@@ -17,7 +17,7 @@ const CHECK_AUTH = gql`
   }
 `;
 
-// GraphQL Mutation for GitHub Authentication
+
 const GITHUB_AUTH = gql`
   mutation GitHubAuth {
     githubAuth {
@@ -34,7 +34,7 @@ export default function SignUp() {
   const navigate = useNavigate();
   const [isGitHubLoading, setIsGitHubLoading] = useState(false);
 
-  // Query to check authentication status
+  
   const { data, loading, error } = useQuery(CHECK_AUTH, {
     fetchPolicy: "network-only",
   });
