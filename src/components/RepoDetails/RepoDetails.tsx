@@ -1,100 +1,15 @@
-import { useMutation, useQuery } from "@apollo/client";
+import { useQuery } from "@apollo/client";
 import { useParams } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import { useEffect, useState } from "react";
-import { GET_USER, SAVE_SONAR_ISSUES, GET_SONAR_ISSUES } from "../graphql/queries";
+import { GET_USER, GET_SONAR_ISSUES } from "../graphql/queries";
+import { SonarIssuesResponse } from "../RepoDetails/types";
+import { motion } from "framer-motion";
 
-interface SonarIssue {
-  issueType: string;
-  severity: string;
-  message: string;
-  rule: string;
-  component: string;
-}
-
-// const RepoDetails = () => {
-//   const { repoName } = useParams();
-//   const { userEmail } = useAuth();
-//   const [githubUsername, setGithubUsername] = useState<string | null>(null);
-//   const [issuesStored, setIssuesStored] = useState(false);
-
-//   const { data: userData } = useQuery(GET_USER, {
-//     variables: { email: userEmail },
-//     skip: !userEmail,
-//   });
-
-//   useEffect(() => {
-//     if (userData?.getUserByEmail?.username) {
-//       setGithubUsername(userData.getUserByEmail.username);
-//     }
-//   }, [userData]);
-
-//   const [saveSonarIssues] = useMutation(SAVE_SONAR_ISSUES);
-
-//   // Move useQuery to the top level
-//   const { data } = useQuery<{ getSonarIssues: SonarIssue[] }>(GET_SONAR_ISSUES, {
-//     variables: { githubUsername: githubUsername || "arockiyajebasanthiya", repoName },
-//   });
-
-//   useEffect(() => {
-//     // if (githubUsername && repoName && !issuesStored) {
-//     //   fetch(`http://localhost:9000/api/fetch-sonar-issues?githubUsername=${githubUsername}&repoName=${repoName}`)
-//     //     .then((res) => res.json())
-//     //     .then((issues: SonarIssue[]) => {
-//     //       if (issues.length > 0) {
-//     //         saveSonarIssues({ variables: { githubUsername, repoName, issues } })
-//     //           .then(() => setIssuesStored(true))
-//     //           .catch(console.error);
-//     //       }
-//     //     })
-//     //     .catch((error) => console.error("Error fetching SonarQube issues:", error));
-//     // }
-//   }, [githubUsername, repoName, saveSonarIssues, issuesStored]);
-
-//   const issues = data?.getSonarIssues ?? [];
-
-//   return (
-//     <div className="p-6">
-//       <h1 className="text-2xl font-bold mb-4">SonarQube Issues for {repoName}</h1>
-//       {issues.length > 0 ? (
-//         <div className="space-y-4">
-//           {issues.map((issue: SonarIssue, index: number) => (
-//             <div key={index} className="p-4 bg-white rounded-lg shadow">
-//               <div className="flex items-start gap-4">
-//                 <div className={`w-3 h-3 mt-1 rounded-full ${
-//                   issue.severity === 'BLOCKER' ? 'bg-red-500' :
-//                   issue.severity === 'CRITICAL' ? 'bg-orange-500' :
-//                   issue.severity === 'MAJOR' ? 'bg-yellow-500' :
-//                   'bg-blue-500'
-//                 }`}></div>
-//                 <div>
-//                   <p className="font-medium">{issue.message}</p>
-//                   <div className="flex gap-4 mt-2 text-sm text-gray-600">
-//                     <span>Type: {issue.issueType}</span>
-//                     <span>Severity: {issue.severity}</span>
-//                     <span>Component: {issue.component}</span>
-//                   </div>
-//                   {issue.rule && (
-//                     <p className="mt-1 text-sm text-gray-500">Rule: {issue.rule}</p>
-//                   )}
-//                 </div>
-//               </div>
-//             </div>
-//           ))}
-//         </div>
-//       ) : (
-//         <p className="text-gray-500">No issues found for this repository.</p>
-//       )}
-//     </div>
-//   );
-// };
 const RepoDetails = () => {
-  const { repoName } = useParams();
+  const { repoName } = useParams<{ repoName: string }>();
   const { userEmail } = useAuth();
   const [githubUsername, setGithubUsername] = useState<string | null>(null);
-
-  // Debugging logs
-  console.log("Initial state:", { repoName, userEmail });
 
   const { data: userData } = useQuery(GET_USER, {
     variables: { email: userEmail },
@@ -103,46 +18,138 @@ const RepoDetails = () => {
 
   useEffect(() => {
     if (userData?.getUserByEmail?.username) {
-      console.log("Setting GitHub username:", userData.getUserByEmail.username);
       setGithubUsername(userData.getUserByEmail.username);
     }
   }, [userData]);
-  console.log(userData);
-  // Main query with complete debugging
-  const { data, loading, error, called } = useQuery<{ getSonarIssues: SonarIssue[] }>(
+
+  const { data, loading, error } = useQuery<SonarIssuesResponse>(
     GET_SONAR_ISSUES,
     {
-      variables: { 
-        githubUsername: githubUsername || "arockiyajebasanthiya", 
-        repoName: repoName || "" 
+      variables: {
+        githubUsername: githubUsername || "arockiyajebasanthiya",
+        repoName: repoName || "",
       },
-      onCompleted: (data) => console.log("Query completed:", data),
-      onError: (error) => console.error("Query error:", error),
+      skip: !repoName,
     }
   );
 
-  console.log("Query debug:", { called, loading, error, data });
-
-  if (loading) return <div className="p-6">Loading issues...</div>;
-  if (error) return <div className="p-6 text-red-500">Error: {error.message}</div>;
+  if (loading)
+    return <div className="p-6">Loading issues...</div>;
+  if (error)
+    return <div className="p-6 text-red-500">Error: {error.message}</div>;
 
   const issues = data?.getSonarIssues || [];
 
   return (
-    <div className="p-6">
-      <h1 className="text-2xl font-bold mb-4">SonarQube Issues for {repoName}</h1>
+    <motion.div 
+      className="p-6"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.6 }}
+    >
+      <h1 className="text-2xl font-bold mb-6 text-center">SonarQube Analysis for {repoName}</h1>
+
       {issues.length > 0 ? (
-        <div className="space-y-4">
+        <motion.div 
+          className="space-y-4"
+          initial="hidden"
+          animate="visible"
+          variants={{
+            hidden: { opacity: 0, y: 10 },
+            visible: {
+              opacity: 1,
+              y: 0,
+              transition: { staggerChildren: 0.2 },
+            },
+          }}
+        >
           {issues.map((issue, index) => (
-            <div></div>
+            <motion.div
+              key={index}
+              className="p-4 bg-white rounded-lg shadow hover:shadow-md transition-shadow"
+              whileHover={{ scale: 1.02 }}
+              variants={{
+                hidden: { opacity: 0, x: -20 },
+                visible: { opacity: 1, x: 0 },
+              }}
+            >
+              <div className="flex items-start gap-4">
+                <div
+                  className={`w-3 h-3 mt-1 rounded-full flex-shrink-0 ${
+                    issue.severity === "BLOCKER"
+                      ? "bg-red-500"
+                      : issue.severity === "CRITICAL"
+                      ? "bg-orange-500"
+                      : issue.severity === "MAJOR"
+                      ? "bg-yellow-500"
+                      : "bg-blue-500"
+                  }`}
+                ></div>
+
+                <div className="flex-1">
+                  <div className="flex justify-between items-start">
+                    <p className="font-medium text-gray-800">{issue.message}</p>
+                    <span className="text-xs px-2 py-1 rounded bg-gray-100 text-gray-600">
+                      {issue.severity}
+                    </span>
+                  </div>
+
+                  <div className="mt-3 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 text-sm text-gray-600">
+                    <div>
+                      <span className="font-semibold">Type:</span> {issue.type}
+                    </div>
+                    <div>
+                      <span className="font-semibold">Rule:</span> {issue.rule}
+                    </div>
+                    <div>
+                      <span className="font-semibold">Location:</span>{" "}
+                      {issue.component}
+                      {issue.line && `:${issue.line}`}
+                    </div>
+                    {issue.effort && (
+                      <div>
+                        <span className="font-semibold">Effort:</span>{" "}
+                        {issue.effort}
+                      </div>
+                    )}
+                    {issue.author && (
+                      <div>
+                        <span className="font-semibold">Author:</span>{" "}
+                        {issue.author}
+                      </div>
+                    )}
+                    {issue.status && (
+                      <div>
+                        <span className="font-semibold">Status:</span>{" "}
+                        {issue.status}
+                      </div>
+                    )}
+                  </div>
+
+                  {issue.textRange && (
+                    <div className="mt-2 p-2 bg-gray-50 rounded text-xs">
+                      <span className="font-semibold">Code Context:</span>
+                      <pre className="mt-1 overflow-x-auto">{issue.textRange}</pre>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </motion.div>
           ))}
-        </div>
+        </motion.div>
       ) : (
-        <p className="text-gray-500">
-          {data ? "No issues found" : "Failed to load issues"}
-        </p>
+        <motion.div
+          className="p-8 text-center bg-green-50 rounded-lg"
+          initial={{ opacity: 0, scale: 0.8 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.6, ease: "easeOut" }}
+        >
+          <p className="text-green-600 font-medium text-lg">
+            🎉 No issues found. Great job! 🎉
+          </p>
+        </motion.div>
       )}
-    </div>
+    </motion.div>
   );
 };
 

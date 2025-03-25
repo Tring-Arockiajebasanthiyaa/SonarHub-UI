@@ -35,50 +35,51 @@ export default function SetPassword() {
   };
 
   return (
-    <div className="bg-dark d-flex align-items-center justify-content-center vh-100">
-      <div className="position-absolute top-0 end-0 m-3">
-        <button
-          type="button"
-          onClick={() => navigate("/")}
-          className="btn btn-sm btn-secondary"
-        >
-          Go Back
-        </button>
-      </div>
-      <div className="signin-form p-4 rounded shadow">
-        <div className="text-center mb-4">
-          <img src={sonar} alt="SonarHub Logo" className="signin-logo mb-3" />
-          <h2 className="text-white">Set Your Password</h2>
+      <div className="d-flex align-items-center justify-content-center vh-100 position-relative">
+        <div className="position-absolute  top-0 b-0 m-3">
+          <button
+            type="button"
+            onClick={() => navigate("/")}
+            className="btn btn-sm btn-secondary text-center text-dark"
+          >
+            Go Back
+          </button>
         </div>
-        <form onSubmit={handleSetPassword}>
-          <div className="mb-3">
-            <input
-              type="email"
-              className="form-control"
-              placeholder="Email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-            />
+        <div className="signin-form p-4 rounded shadow">
+          <div className="text-center mb-4">
+            <img src={sonar} alt="SonarHub Logo" className="signin-logo mb-3" />
+            <h2 className="text-dark">Set Your Password</h2>
           </div>
-          <div className="mb-3">
-            <input
-              type="password"
-              className="form-control"
-              placeholder="Set Password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-            />
-          </div>
-          {error && <p className="text-danger text-center mb-3">{error}</p>}
-          <div className="d-grid mb-3">
-            <button type="submit" className="btn btn-success">
-              Set Password
-            </button>
-          </div>
-        </form>
+          <form onSubmit={handleSetPassword}>
+            <div className="mb-3">
+              <input
+                type="email"
+                className="form-control"
+                placeholder="Email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+              />
+            </div>
+            <div className="mb-3">
+              <input
+                type="password"
+                className="form-control"
+                placeholder="Set Password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+              />
+            </div>
+            {error && <p className="text-danger text-center mb-3">{error}</p>}
+            <div className="d-grid mb-3">
+              <button type="submit" className="btn btn-success">
+                Set Password
+              </button>
+            </div>
+          </form>
+        </div>
       </div>
-    </div>
-  );
+    );
+    
 }

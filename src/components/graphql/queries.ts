@@ -119,14 +119,28 @@ mutation SaveSonarIssues($githubUsername: String!, $repoName: String!, $issues: 
 `;
 
 export const GET_SONAR_ISSUES = gql`
-query GetSonarIssues($githubUsername: String!, $repoName: String!) {
-  getSonarIssues(githubUsername: $githubUsername, repoName: $repoName) {
-    issueType
-    severity
-    message
-    rule
-    component
+  query GetSonarIssues($githubUsername: String!, $repoName: String!) {
+    getSonarIssues(githubUsername: $githubUsername, repoName: $repoName) {
+      type
+      severity
+      message
+      rule
+      component
+      line
+      effort
+      debt
+      author
+      status
+      resolution
+      hash
+      textRange
+      flows
+      createdAt
+      project {
+        title
+        description
+      }
+    }
   }
-}
 `;
 

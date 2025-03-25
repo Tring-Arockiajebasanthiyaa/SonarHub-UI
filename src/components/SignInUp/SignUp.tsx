@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { gql, useMutation, useQuery } from "@apollo/client";
+import "bootstrap/dist/css/bootstrap.min.css";
 import "./styles.css";
-
+import logo from "../../assets/logo.webp"; 
 
 const CHECK_AUTH = gql`
   query CheckAuth {
@@ -16,7 +17,6 @@ const CHECK_AUTH = gql`
     }
   }
 `;
-
 
 const GITHUB_AUTH = gql`
   mutation GitHubAuth {
@@ -33,13 +33,11 @@ const GITHUB_AUTH = gql`
 export default function SignUp() {
   const navigate = useNavigate();
   const [isGitHubLoading, setIsGitHubLoading] = useState(false);
-
   
   const { data, loading, error } = useQuery(CHECK_AUTH, {
     fetchPolicy: "network-only",
   });
 
-  // Mutation to handle GitHub authentication
   const [githubAuth, { data: authData, error: authError }] = useMutation(GITHUB_AUTH);
 
   useEffect(() => {
@@ -55,9 +53,7 @@ export default function SignUp() {
 
     if (code) {
       setIsGitHubLoading(true);
-      githubAuth({
-        variables: { code },
-      })
+      githubAuth({ variables: { code } })
         .then((response) => {
           if (response.data?.githubAuth?.isAuthenticated) {
             localStorage.setItem("authToken", response.data.githubAuth.token);
@@ -77,28 +73,28 @@ export default function SignUp() {
     const clientId = import.meta.env.VITE_CLIENT_ID; 
     const redirectUri = import.meta.env.VITE_BACKEND_AUTH_URL || " ";
     const githubAuthUrl = `https://github.com/login/oauth/authorize?client_id=${clientId}&redirect_uri=${encodeURIComponent(redirectUri)}&scope=user:email`;
-
     window.location.href = githubAuthUrl;
   };
 
-  if (loading) return <p>Loading...</p>;
-  if (error) return <p>Error loading authentication status</p>;
+  if (loading) return <p className="text-light text-center">Loading...</p>;
+  if (error) return <p className="text-danger text-center">Error loading authentication status</p>;
 
   return (
-    <div className="form-container">
-      <h1>Sign up to SonarHub</h1>
+    <div className="form-container text-center">
+      <img src={logo} alt="SonarHub Logo" className="logo" />
+      <h1 className="text-light">Sign up to SonarHub</h1>
       {data?.checkAuth?.isAuthenticated ? (
-        <p>Welcome, {data.checkAuth.user.displayName}! Redirecting...</p>
+        <p className="text-light">Welcome, {data.checkAuth.user.email}! Redirecting...</p>
       ) : (
         <button
           onClick={handleGitHubSignup}
-          className="github-button"
+          className="btn btn-outline-light github-button"
           disabled={isGitHubLoading}
         >
           {isGitHubLoading ? "Signing in with GitHub..." : "Sign up with GitHub"}
         </button>
       )}
-      {authError && <p>Error: {authError.message}</p>}
+      {authError && <p className="text-danger">Error: {authError.message}</p>}
     </div>
   );
 }
