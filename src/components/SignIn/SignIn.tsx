@@ -8,6 +8,8 @@ import { useAuth } from "../../context/AuthContext";
 import sonar from "../../assets/logo.webp";
 import "./SignIn.css";
 import "bootstrap/dist/css/bootstrap.min.css";
+import { motion } from "framer-motion";
+import { FaUser, FaLock } from 'react-icons/fa'; // Import icons
 
 interface SignInFormInputs {
   email: string;
@@ -48,15 +50,26 @@ export default function SignIn() {
   };
 
   return (
-    <div className="signin-container">
-      <div className="signin-form">
+    <motion.div
+      className="signin-container full-container"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.5 }}
+    >
+      <motion.div
+        className="signin-form"
+        initial={{ y: -50, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        transition={{ duration: 0.5, delay: 0.2 }}
+      >
         <div className="text-center mb-4">
           <img src={sonar} alt="SonarHub Logo" className="signin-logo" />
           <h2 className="mt-3">Sign in to SonarHub</h2>
         </div>
 
         <form onSubmit={handleSubmit(handleLogin)}>
-          <div className="mb-3">
+          <div className="mb-3 input-container">
+            <FaUser className="input-icon" />
             <input
               type="email"
               className="form-control"
@@ -66,20 +79,19 @@ export default function SignIn() {
             {errors.email && <p className="error">{errors.email.message}</p>}
           </div>
 
-          <div className="mb-3">
+          <div className="mb-3 input-container">
+            <FaLock className="input-icon" />
             <input
               type="password"
               className="form-control"
               placeholder="Password"
               {...register("password", { required: "Password is required" })}
             />
-            {errors.password && (
-              <p className="error">{errors.password.message}</p>
-            )}
+            {errors.password && <p className="error">{errors.password.message}</p>}
           </div>
 
           <div className="mb-3">
-            <a href="/forgot-password">Forgot password?</a>
+            <a href="/forgot-password" className="text-white text-decoration-none hover-effect">Forgot password?</a>
           </div>
 
           <div className="d-grid">
@@ -90,16 +102,21 @@ export default function SignIn() {
         </form>
 
         <div className="text-center mt-3">
-          <a href="/signup">New to SonarHub? Create an account.</a>
+          <a href="/signup" className="text-white text-decoration-none  hover-effect">New to SonarHub? Create an account.</a>
         </div>
-      </div>
+      </motion.div>
 
-      <div className="signin-footer">
+      <motion.div
+        className="signin-footer"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.5, delay: 0.4 }}
+      >
         <a href="/terms">Terms</a>
         <a href="/privacy">Privacy</a>
         <a href="/security">Security</a>
         <a href="/contact">Contact SonarHub</a>
-      </div>
-    </div>
+      </motion.div>
+    </motion.div>
   );
 }

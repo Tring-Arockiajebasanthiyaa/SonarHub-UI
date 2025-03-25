@@ -19,6 +19,8 @@ const CHECK_AUTH = gql`
 const LandingPage: React.FC = () => {
   const navigate = useNavigate();
   const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
+  const [showVideo, setShowVideo] = useState(false); // Toggle video state
+
   const { data, loading, error } = useQuery(CHECK_AUTH, {
     variables: { onlyStatus: true },
   });
@@ -31,6 +33,26 @@ const LandingPage: React.FC = () => {
       }
     }
   }, [data, loading, error, navigate]);
+
+  if (showVideo) {
+    return (
+      <div className="video-container">
+        <button className="btn btn-secondary back-button" onClick={() => setShowVideo(false)}>
+          ← Back
+        </button>
+        <div className="video-wrapper">
+          <iframe
+            src="https://www.facebook.com/plugins/video.php?href=https://www.facebook.com/watch/?v=222247089235175"
+            width="800"
+            height="450"
+            allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share"
+            allowFullScreen
+            title="Watch Video"
+          ></iframe>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="landing-container">
@@ -51,7 +73,7 @@ const LandingPage: React.FC = () => {
           SonarHub enhances your development workflow.
         </p>
         <div className="hero-buttons">
-          <button className="watch-video">Watch Video</button>
+          <button className="watch-video" onClick={() => setShowVideo(true)}>Watch Video</button>
           <button className="get-started" onClick={() => navigate("/signup")}>Get Started</button>
         </div>
       </main>

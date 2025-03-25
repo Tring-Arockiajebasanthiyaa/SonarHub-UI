@@ -13,7 +13,7 @@ import RepoDetails from "./components/RepoDetails/RepoDetails";
 import SonarRepo from "./components/SonarRepo/SonarRepo";
 import DashboardLayout from "./components/DashboardLayout/DashboardLayout";
 import { AuthProvider, useAuth } from "./context/AuthContext"; 
-
+import LearnMore from "./components/LearnMore/LearnMore";
 const PrivateRoute: React.FC = () => {
   const { isAuthenticated } = useAuth();
   return isAuthenticated ? <Outlet /> : <Navigate to="/signin" replace />;
@@ -36,6 +36,7 @@ export default function App() {
               <Route path="github-repos" element={<GitHubRepos />} />
               <Route path="sonar-repo" element={<SonarRepo />} />
               <Route path="repo/:repoName" element={<RepoDetails />} />
+              <Route path="learn-more" element={<LearnMore/>}/>
             </Route>
         </Route>
         <Route path="*" element={<Navigate to="/" replace />} />

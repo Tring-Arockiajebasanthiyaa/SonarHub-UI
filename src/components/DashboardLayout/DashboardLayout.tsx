@@ -12,7 +12,7 @@ const DashboardLayout: React.FC = () => {
     { title: "Dashboard", path: "/dashboard", icon: <FaTachometerAlt /> },
     { title: "Repo Explorer", path: "/dashboard/github-repos", icon: <FaGithub /> },
     { title: "Sonar Insights", path: "/dashboard/sonar-repo", icon: <FaChartBar /> },
-    { title: "Knowledge Hub", path: "", icon: <FaQuestionCircle /> },
+    { title: "Knowledge Hub", path: "/dashboard/learn-more", icon: <FaQuestionCircle /> },
   ];
 
   return (
@@ -22,12 +22,12 @@ const DashboardLayout: React.FC = () => {
           <div className="logo-container">
             <img src={sonarLogo} alt="SonarHub Logo" className="sonarhub-logo" />
           </div>
-          <div className="title-container">
+          {/* <div className="title-container">
             <h4 className="sidebar-title">
               <span className="sonar-text">Sonar</span>
               <span className="hub-text">Hub</span>
             </h4>
-          </div>
+          </div> */}
         </div>
         <ul className="sidebar-nav">
           {sideMenus?.map((data) => (

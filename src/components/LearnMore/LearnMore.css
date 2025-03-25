@@ -1,0 +1,135 @@
+
+.dark-theme {
+    background-color: #1a1a2e;
+    color: #e6e6e6;
+    min-height: 100vh;
+    padding: 3rem 0;
+  }
+  
+  
+  .animate-fade-in {
+    animation: fadeIn 1s ease-in-out;
+  }
+  
+  .animate-slide-up {
+    animation: slideUp 0.8s ease-out;
+  }
+  
+  .delay-1 {
+    animation-delay: 0.3s;
+  }
+  
+  .delay-2 {
+    animation-delay: 0.6s;
+  }
+  
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+  
+  @keyframes slideUp {
+    from { 
+      opacity: 0;
+      transform: translateY(30px);
+    }
+    to { 
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  
+ 
+  .learn-card {
+    background-color: #16213e;
+    border: 1px solid #2d4263;
+    border-radius: 10px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    height: 100%;
+  }
+  
+  .learn-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4);
+  }
+  
+  .card-header {
+    background-color: #0f3460;
+    border-bottom: 1px solid #2d4263;
+    padding: 1.25rem;
+  }
+  
+  .card-header h2 {
+    margin: 0;
+    font-size: 1.5rem;
+    color: #e94560;
+  }
+  
+  
+  .accordion-button {
+    background-color: #0f3460;
+    color: #e6e6e6;
+  }
+  
+  .accordion-button:not(.collapsed) {
+    background-color: #0f3460;
+    color: #e94560;
+  }
+  
+  .accordion-body {
+    background-color: #1a1a2e;
+  }
+  
+  /* Code Blocks */
+  .code-block {
+    background-color: #0a0a1a;
+    color: #4fc3f7;
+    padding: 1rem;
+    border-radius: 5px;
+    border-left: 3px solid #e94560;
+    overflow-x: auto;
+  }
+  
+  /* Issue List */
+  .issue-list {
+    padding-left: 1rem;
+  }
+  
+  .issue-list li {
+    margin-bottom: 1.5rem;
+  }
+  
+  .issue-list strong {
+    color: #e94560;
+  }
+  
+  /* Quick Actions */
+  .quick-actions {
+    margin-top: 3rem;
+    text-align: center;
+  }
+  
+  .quick-actions h3 {
+    color: #4fc3f7;
+  }
+  
+  .btn-outline-primary {
+    color: #4fc3f7;
+    border-color: #4fc3f7;
+  }
+  
+  .btn-outline-primary:hover {
+    background-color: #4fc3f7;
+    color: #16213e;
+  }
+  
+  .btn-outline-success {
+    color: #2ecc71;
+    border-color: #2ecc71;
+  }
+  
+  .btn-outline-success:hover {
+    background-color: #2ecc71;
+    color: #16213e;
+  }

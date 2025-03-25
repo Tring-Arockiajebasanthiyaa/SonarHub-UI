@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { gql, useMutation, useQuery } from "@apollo/client";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "./styles.css";
-import logo from "../../assets/logo.webp"; 
+import logo from "../../assets/logo.webp";
 
 const CHECK_AUTH = gql`
   query CheckAuth {
@@ -33,7 +33,7 @@ const GITHUB_AUTH = gql`
 export default function SignUp() {
   const navigate = useNavigate();
   const [isGitHubLoading, setIsGitHubLoading] = useState(false);
-  
+
   const { data, loading, error } = useQuery(CHECK_AUTH, {
     fetchPolicy: "network-only",
   });
@@ -70,7 +70,7 @@ export default function SignUp() {
   }, [githubAuth, navigate]);
 
   const handleGitHubSignup = () => {
-    const clientId = import.meta.env.VITE_CLIENT_ID; 
+    const clientId = import.meta.env.VITE_CLIENT_ID;
     const redirectUri = import.meta.env.VITE_BACKEND_AUTH_URL || " ";
     const githubAuthUrl = `https://github.com/login/oauth/authorize?client_id=${clientId}&redirect_uri=${encodeURIComponent(redirectUri)}&scope=user:email`;
     window.location.href = githubAuthUrl;
@@ -86,13 +86,21 @@ export default function SignUp() {
       {data?.checkAuth?.isAuthenticated ? (
         <p className="text-light">Welcome, {data.checkAuth.user.email}! Redirecting...</p>
       ) : (
-        <button
-          onClick={handleGitHubSignup}
-          className="btn btn-outline-light github-button"
-          disabled={isGitHubLoading}
-        >
-          {isGitHubLoading ? "Signing in with GitHub..." : "Sign up with GitHub"}
-        </button>
+        <>
+          <button
+            onClick={handleGitHubSignup}
+            className="btn btn-outline-light github-button"
+            disabled={isGitHubLoading}
+          >
+            {isGitHubLoading ? "Signing in with GitHub..." : "Sign up with GitHub"}
+          </button>
+          <p className="text-light mt-3">
+            Don't have an account?{" "}
+            <Link to="/signin" className="create-account-link">
+              Already have an Account
+            </Link>
+          </p>
+        </>
       )}
       {authError && <p className="text-danger">Error: {authError.message}</p>}
     </div>
