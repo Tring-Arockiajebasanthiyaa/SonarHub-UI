@@ -81,7 +81,7 @@
     background-color: #1a1a2e;
   }
   
-  /* Code Blocks */
+  
   .code-block {
     background-color: #0a0a1a;
     color: #4fc3f7;
@@ -91,7 +91,7 @@
     overflow-x: auto;
   }
   
-  /* Issue List */
+  
   .issue-list {
     padding-left: 1rem;
   }
@@ -104,7 +104,7 @@
     color: #e94560;
   }
   
-  /* Quick Actions */
+  
   .quick-actions {
     margin-top: 3rem;
     text-align: center;

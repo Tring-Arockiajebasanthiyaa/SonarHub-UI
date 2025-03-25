@@ -1,7 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 
-// Define the context type
 interface AuthContextType {
   isAuthenticated: boolean;
   userEmail: string | null;
@@ -12,37 +11,37 @@ interface AuthContextType {
   logout: () => void;
 }
 
-
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const navigate = useNavigate(); 
-
- 
-  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(localStorage.getItem("authToken") !== null);
-  const [userEmail, setUserEmail] = useState<string | null>(localStorage.getItem("userEmail"));
+  const navigate = useNavigate();
+  const location = useLocation();
   const [authToken, setAuthToken] = useState<string | null>(localStorage.getItem("authToken"));
+  const [userEmail, setUserEmail] = useState<string | null>(localStorage.getItem("userEmail"));
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(!!authToken);
 
   useEffect(() => {
     if (authToken) {
-      setIsAuthenticated(true);  
+      setIsAuthenticated(true);
       localStorage.setItem("authToken", authToken);
       localStorage.setItem("userEmail", userEmail || "");
+
+      if (["/signin", "/signup", "/"].includes(location.pathname)) {
+        navigate("/dashboard", { replace: true });
+      }
     } else {
       localStorage.removeItem("authToken");
       localStorage.removeItem("userEmail");
       setIsAuthenticated(false);
     }
-  }, [authToken, userEmail]);
-  
+  }, [authToken]);
+
   const logout = () => {
     localStorage.removeItem("authToken");
     localStorage.removeItem("userEmail");
-    setIsAuthenticated(false);
     setAuthToken(null);
     setUserEmail(null);
-    
+    setIsAuthenticated(false);
     navigate("/signin");
   };
 
@@ -52,7 +51,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     </AuthContext.Provider>
   );
 };
-
 
 export const useAuth = (): AuthContextType => {
   const context = useContext(AuthContext);

@@ -9,7 +9,7 @@ import sonar from "../../assets/logo.webp";
 import "./SignIn.css";
 import "bootstrap/dist/css/bootstrap.min.css";
 import { motion } from "framer-motion";
-import { FaUser, FaLock } from 'react-icons/fa'; // Import icons
+import { FaUser, FaLock } from 'react-icons/fa';
 
 interface SignInFormInputs {
   email: string;
@@ -23,7 +23,7 @@ export default function SignIn() {
     formState: { errors },
   } = useForm<SignInFormInputs>();
   const navigate = useNavigate();
-  const { setIsAuthenticated } = useAuth();
+  const { setIsAuthenticated, setAuthToken, setUserEmail } = useAuth();
 
   const [signIn] = useMutation(SIGN_IN);
 
@@ -37,6 +37,10 @@ export default function SignIn() {
       if (data?.signIn) {
         localStorage.setItem("authToken", data.signIn);
         localStorage.setItem("userEmail", email);
+        
+        // Update AuthContext state
+        setAuthToken(data.signIn);
+        setUserEmail(email);
         setIsAuthenticated(true);
 
         showToast("User login successful", "success", navigate, "/dashboard");
@@ -102,7 +106,7 @@ export default function SignIn() {
         </form>
 
         <div className="text-center mt-3">
-          <a href="/signup" className="text-white text-decoration-none  hover-effect">New to SonarHub? Create an account.</a>
+          <a href="/signup" className="text-white text-decoration-none hover-effect">New to SonarHub? Create an account.</a>
         </div>
       </motion.div>
 

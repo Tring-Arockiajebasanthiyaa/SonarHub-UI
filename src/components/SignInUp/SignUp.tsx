@@ -96,7 +96,7 @@ export default function SignUp() {
           </button>
           <p className="text-light mt-3">
             Don't have an account?{" "}
-            <Link to="/signin" className="create-account-link">
+            <Link to="/signin" className="account-link">
               Already have an Account
             </Link>
           </p>
