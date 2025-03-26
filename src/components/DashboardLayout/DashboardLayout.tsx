@@ -1,6 +1,6 @@
 import React from "react";
 import { Outlet, useNavigate } from "react-router-dom";
-import { useAuth } from "../../context/AuthContext";
+import { useAuth } from "../../Context/AuthContext";
 import "../DashboardLayout/DashboardLayout.css";
 import { FaTachometerAlt, FaGithub, FaChartBar, FaQuestionCircle, FaSignOutAlt } from "react-icons/fa";
 import sonarLogo from "../../assets/logo.webp";
@@ -22,12 +22,7 @@ const DashboardLayout: React.FC = () => {
           <div className="logo-container">
             <img src={sonarLogo} alt="SonarHub Logo" className="sonarhub-logo" />
           </div>
-          {/* <div className="title-container">
-            <h4 className="sidebar-title">
-              <span className="sonar-text">Sonar</span>
-              <span className="hub-text">Hub</span>
-            </h4>
-          </div> */}
+
         </div>
         <ul className="sidebar-nav">
           {sideMenus?.map((data) => (

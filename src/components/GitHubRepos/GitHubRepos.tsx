@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useQuery } from "@apollo/client";
-import { GET_USER_REPOSITORIES } from "../graphql/queries";
-import apolloGitHubClient from "../graphql/apolloGitHubClient";
+import { GET_USER_REPOSITORIES } from "../Graphql/Queries";
+import apolloGitHubClient from "../Graphql/ApolloGitHubClient";
 import { ApolloProvider } from "@apollo/client";
 import "./GitHubRepo.css"
 const GitHubReposComponent: React.FC = () => {
@@ -21,7 +21,7 @@ const GitHubReposComponent: React.FC = () => {
 
   return (
     <div className="github-repos-container">
-      <h2 className="github-repos-title">GitHub Repositories</h2>
+      <h2 className="github-repos-title text-center">GitHub Repositories</h2>
       <div className="github-search-container">
         <input
           type="text"

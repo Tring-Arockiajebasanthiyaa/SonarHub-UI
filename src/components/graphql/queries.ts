@@ -39,30 +39,28 @@ export const GET_USER_REPOSITORIES = gql`
 `;
 
 export const GET_USER_ACTIVITY = gql`
-  query getUserActivity($githubUsername: String!) {
-    getUserActivity(githubUsername: $githubUsername) {
-      u_id
-      githubUsername
-      commitHistory
-      repoCommits
-      totalRepositories
-      totalCommits
-      totalForks
-      totalStars
-      publicRepoCount
-      privateRepoCount
-      languagesUsed
-      topContributedRepo
-      earliestRepoCreatedAt
-      mostRecentlyUpdatedRepo
-      lastActive
-      createdAt
-      updatedAt
-      sonarIssues 
-      issuePercentage
-      dangerLevel
-    }
+  query GetUserActivity($githubUsername: String!) {
+  getUserActivity(githubUsername: $githubUsername) {
+    githubUsername
+    totalRepositories
+    totalCommits
+    totalStars
+    totalForks
+    publicRepoCount
+    privateRepoCount
+    languagesUsed
+    topContributedRepo
+    earliestRepoCreatedAt
+    mostRecentlyUpdatedRepo
+    lastActive
+    commitHistory
+    repoCommits
+    sonarIssues
+    issuePercentage
+    dangerLevel
   }
+}
+
 `;
 
 export const GET_REPOSITORIES = gql`

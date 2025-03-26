@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 import "./SetPassword.css";
 import "bootstrap/dist/css/bootstrap.min.css";
 import sonar from "../../assets/logo.webp";
-import { SET_PASSWORD, SEND_PASSWORD_CHANGE_EMAIL } from "../graphql/queries";
+import { SET_PASSWORD, SEND_PASSWORD_CHANGE_EMAIL } from "../Graphql/Queries";
 import { motion } from "framer-motion";
 import { FaEnvelope, FaLock } from 'react-icons/fa';
 

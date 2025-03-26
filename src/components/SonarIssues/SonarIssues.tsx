@@ -1,6 +1,6 @@
 import React, { useEffect } from "react";
 import { useQuery } from "@apollo/client";
-import { GET_USER_ACTIVITY } from "../graphql/queries";
+import { GET_USER_ACTIVITY } from "../Graphql/Queries";
 
 const SonarIssues = ({ githubUsername }: { githubUsername: string }) => {
   const { data, loading, error } = useQuery(GET_USER_ACTIVITY, { variables: { githubUsername } });

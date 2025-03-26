@@ -1,9 +1,9 @@
 import { useQuery } from "@apollo/client";
 import { useParams } from "react-router-dom";
-import { useAuth } from "../../context/AuthContext";
+import { useAuth } from "../../Context/AuthContext";
 import { useEffect, useState } from "react";
-import { GET_USER, GET_SONAR_ISSUES } from "../graphql/queries";
-import { SonarIssuesResponse } from "../RepoDetails/types";
+import { GET_USER, GET_SONAR_ISSUES } from "../Graphql/Queries";
+import { SonarIssuesResponse } from "./types";
 import { motion } from "framer-motion";
 
 const RepoDetails = () => {

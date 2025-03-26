@@ -3,7 +3,7 @@ import { useMutation } from "@apollo/client";
 import "./ForgotPassword.css";
 import { useNavigate } from "react-router-dom";
 import sonar from "../../assets/logo.webp";
-import { FORGOT_PASSWORD, RESET_PASSWORD } from "../graphql/mutations";
+import { FORGOT_PASSWORD, RESET_PASSWORD } from "../Graphql/Mutations";
 import { motion } from "framer-motion";
 import { FaEnvelope, FaLock } from 'react-icons/fa';
 

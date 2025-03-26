@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { useQuery, gql } from "@apollo/client";
-import { useAuth } from "../../context/AuthContext";
+import { useAuth } from "../../Context/AuthContext";
 import { useNavigate } from "react-router-dom";
-import { GET_REPOSITORIES } from "../graphql/queries";
+import { GET_REPOSITORIES } from "../Graphql/Queries";
 import "./SonarRepo.css";
 import { motion } from "framer-motion";
 import { FaArrowRight } from "react-icons/fa";

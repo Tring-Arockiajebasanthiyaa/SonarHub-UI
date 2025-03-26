@@ -42,7 +42,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setAuthToken(null);
     setUserEmail(null);
     setIsAuthenticated(false);
-    navigate("/signin");
+    navigate("/");
   };
 
   return (

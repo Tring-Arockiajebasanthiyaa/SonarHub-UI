@@ -1,11 +1,25 @@
 import React, { useEffect, useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { useQuery, useLazyQuery } from "@apollo/client";
-import { GET_USER_ACTIVITY, GET_USER } from "../graphql/queries";
-import { useAuth } from "../../context/AuthContext";
+import { GET_USER_ACTIVITY, GET_USER } from "../Graphql/Queries";
+import { useAuth } from "../../Context/AuthContext";
 import moment from "moment";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faCodeBranch, faClock, faBook, faStar, faCode, faShieldAlt, faBug, faFire, faGlobe, faLock } from "@fortawesome/free-solid-svg-icons";
+import {
+  faCodeBranch,
+  faClock,
+  faBook,
+  faStar,
+  faCode,
+  faShieldAlt,
+  faBug,
+  faFire,
+  faGlobe,
+  faLock,
+  faLanguage,
+  faCalendarAlt,
+  faExclamationTriangle,
+} from "@fortawesome/free-solid-svg-icons";
 import { ClipLoader } from "react-spinners";
 import { motion } from "framer-motion";
 import "./Dashboard.css";
@@ -38,22 +52,30 @@ const Dashboard: React.FC = () => {
     }
   }, [githubUsername, fetchUserActivity]);
 
-  const userActivity = useMemo(() => data?.getUserActivity || {}, [data]);
+  const useActivity = useMemo(() => data?.getUserActivity || {}, [data]);
+
+  console.log(useActivity);
+  console.log(JSON.stringify(useActivity, null, 2));
 
   const githubActivities = useMemo(
     () => [
-      { title: "Total Contributions", data: userActivity.totalCommits || 0, icon: faCodeBranch, color: "#ff7f50" },
-      { title: "Last Active", data: moment(userActivity.lastActive).format("MM-DD-YYYY") || "-", icon: faClock, color: "#6495ed" },
-      { title: "Repositories Owned", data: userActivity.totalRepositories || 0, icon: faBook, color: "#32cd32" },
-      { title: "Stars Earned", data: userActivity.totalStars || 0, icon: faStar, color: "#ffa500" },
-      { title: "Total Forks", data: userActivity.totalForks || 0, icon: faCode, color: "#dc143c" },
-      { title: "Public Repos", data: userActivity.publicRepoCount || 0, icon: faGlobe, color: "#20b2aa" },
-      { title: "Private Repos", data: userActivity.privateRepoCount || 0, icon: faLock, color: "#9370db" },
-      { title: "Most Active Repo", data: userActivity.topContributedRepo || "-", icon: faFire, color: "#ff4500" },
-      { title: "Code Vulnerabilities", data: userActivity.sonarIssues || "-", icon: faBug, color: "#ff6347" },
-      { title: "Issue Rate (%)", data: userActivity.issuePercentage || "0%", icon: faShieldAlt, color: "#4682b4" },
+      { title: "GitHub Username", data: githubUsername || "-", icon: faCodeBranch, color: "#ff7f50" },
+      { title: "Total Repositories", data: useActivity.totalRepositories || 0, icon: faBook, color: "#32cd32" },
+      { title: "Total Commits", data: useActivity.totalCommits || 0, icon: faCode, color: "#ff7f50" },
+      { title: "Stars Earned", data: useActivity.totalStars || 0, icon: faStar, color: "#ffa500" },
+      { title: "Total Forks", data: useActivity.totalForks || 0, icon: faCode, color: "#dc143c" },
+      { title: "Public Repos", data: useActivity.publicRepoCount || 0, icon: faGlobe, color: "#20b2aa" },
+      { title: "Private Repos", data: useActivity.privateRepoCount || 0, icon: faLock, color: "#9370db" },
+      { title: "Languages Used", data: useActivity.languagesUsed?.join(", ") || "-", icon: faLanguage, color: "#ff8c00" },
+      { title: "Most Active Repo", data: useActivity.topContributedRepo || "-", icon: faFire, color: "#ff4500" },
+      { title: "Earliest Repo Created", data: moment(useActivity.earliestRepoCreatedAt).format("MM-DD-YYYY") || "-", icon: faCalendarAlt, color: "#8a2be2" },
+      { title: "Most Recently Updated Repo", data: moment(useActivity.mostRecentlyUpdatedRepo).format("MM-DD-YYYY") || "-", icon: faClock, color: "#6495ed" },
+      { title: "Last Active", data: moment(useActivity.lastActive).format("MM-DD-YYYY") || "-", icon: faClock, color: "#6495ed" },
+      { title: "Code Vulnerabilities", data: useActivity.sonarIssues || "-", icon: faBug, color: "#ff6347" },
+      { title: "Issue Rate (%)", data: useActivity.issuePercentage || "0%", icon: faShieldAlt, color: "#4682b4" },
+      { title: "Danger Level", data: useActivity.dangerLevel || "Low", icon: faExclamationTriangle, color: "#ff0000" },
     ],
-    [userActivity]
+    [useActivity, githubUsername]
   );
 
   return (
@@ -64,7 +86,7 @@ const Dashboard: React.FC = () => {
 
       {loading ? (
         <div className="spinner-container">
-           <ClipLoader color="#58a6ff" size={80} />
+          <ClipLoader color="#58a6ff" size={80} />
         </div>
       ) : (
         <motion.div className="card-grid">

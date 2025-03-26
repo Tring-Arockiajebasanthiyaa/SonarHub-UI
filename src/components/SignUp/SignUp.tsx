@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { gql, useMutation, useQuery } from "@apollo/client";
 import "bootstrap/dist/css/bootstrap.min.css";
-import "./styles.css";
+import "./SignUp.css";
 import logo from "../../assets/logo.webp";
 
 const CHECK_AUTH = gql`

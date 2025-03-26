@@ -59,7 +59,6 @@ const LandingPage: React.FC = () => {
       <nav className="navbar">
         <img src={logo} alt="SonarHub Logo" className="logo-img" />
         <div className="auth-buttons">
-          <Link to="/" className="nav-link">Home</Link>
           <Link to="/signin" className="nav-link signin">Sign In</Link>
           <Link to="/signup" className="nav-link signup">Sign Up</Link>
         </div>

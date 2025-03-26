@@ -1,7 +1,7 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
 import { ApolloProvider } from "@apollo/client";
-import client from "./components/graphql/apollo-client"; 
+import client from "./components/Graphql/ApolloClient"; 
 import App from "./App";
 import Toaster from "./components/Toaster/Toaster";
 

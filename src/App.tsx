@@ -1,9 +1,9 @@
 import React from "react";
 import { BrowserRouter as Router, Routes, Route, Navigate, Outlet } from "react-router-dom";
 import { ApolloProvider } from "@apollo/client";
-import client from "./components/graphql/apollo-client";
+import client from "./components/Graphql/ApolloClient";
 import SignIn from "./components/SignIn/SignIn";
-import SignUp from "./components/SignInUp/SignUp";
+import SignUp from "./components/SignUp/SignUp";
 import Dashboard from "./components/Dashboard/Dashboard";
 import LandingPage from "./components/LandingPage/LandingPage";
 import SetPassword from "./components/SetPassword/SetPassword";
@@ -13,12 +13,12 @@ import RepoDetails from "./components/RepoDetails/RepoDetails";
 import SonarRepo from "./components/SonarRepo/SonarRepo";
 import DashboardLayout from "./components/DashboardLayout/DashboardLayout";
 import LearnMore from "./components/LearnMore/LearnMore";
-import { AuthProvider, useAuth } from "./context/AuthContext"; 
+import { AuthProvider, useAuth } from "./Context/AuthContext"; 
 
 const PrivateRoute: React.FC = () => {
   const { isAuthenticated } = useAuth();
   console.log("PrivateRoute - isAuthenticated:", isAuthenticated);
-  return isAuthenticated ? <Outlet /> : <Navigate to="/signin" replace />;
+  return isAuthenticated ? <Outlet /> : <Navigate to="/" replace />;
 };
 
 

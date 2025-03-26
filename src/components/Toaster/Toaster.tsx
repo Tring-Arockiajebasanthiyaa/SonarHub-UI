@@ -1,6 +1,6 @@
 import React from "react";
 import { ToastContainer, ToastContentProps, toast, Slide } from "react-toastify";
-import { ToasterType } from "./types/Toaster.types.tsx";
+import { ToasterType } from "./Types/Toaster.types.tsx";
 import "./Toaster.css";
 
 const Toaster: React.FC = () => {
@@ -29,16 +29,15 @@ export const showToast = (
           if (navigateTo && navigate) navigate(navigateTo);
         }}
       >
-        ❌
       </button>
     </div>
   ), {
     type,
     icon: false,
-    autoClose: type === "info" ? false : 2000, // Auto close for success/error
+    autoClose: type === "info" ? false : 2000, 
     onClose: () => {
       if (navigateTo && navigate) {
-        setTimeout(() => navigate(navigateTo), 100); // Ensures smooth transition
+        setTimeout(() => navigate(navigateTo), 100); 
       }
     }
   });
