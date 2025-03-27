@@ -43,6 +43,7 @@ export default function SignUp() {
   useEffect(() => {
     if (data?.checkAuth?.isAuthenticated) {
       localStorage.setItem("authToken", data.checkAuth.token);
+      alert("You are already signup");
       navigate(data.checkAuth.user.password ? "/dashboard" : "/set-password");
     }
   }, [data, navigate]);

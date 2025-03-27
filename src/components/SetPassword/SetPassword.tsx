@@ -1,10 +1,10 @@
-import React, { useState } from "react";
-import { useMutation } from "@apollo/client";
+import React, { useState ,useEffect} from "react";
+import { useMutation , useQuery } from "@apollo/client";
 import { useNavigate } from "react-router-dom";
 import "./SetPassword.css";
 import "bootstrap/dist/css/bootstrap.min.css";
 import sonar from "../../assets/logo.webp";
-import { SET_PASSWORD, SEND_PASSWORD_CHANGE_EMAIL } from "../Graphql/Queries";
+import { SET_PASSWORD,GET_SIGNUP_EMAIL} from "../Graphql/Queries";
 import { motion } from "framer-motion";
 import { FaEnvelope, FaLock } from 'react-icons/fa';
 
@@ -14,9 +14,14 @@ export default function SetPassword() {
   const [error, setError] = useState("");
   const navigate = useNavigate();
 
+  const { data ,refetch} = useQuery(GET_SIGNUP_EMAIL);
   const [setPasswordMutation] = useMutation(SET_PASSWORD);
-  const [sendPasswordChangeEmail] = useMutation(SEND_PASSWORD_CHANGE_EMAIL);
-
+  useEffect(() => {
+    if (data?.getSignupEmail) {
+      setEmail(data.getSignupEmail);
+    }
+  }, [data]);
+  
   const handleSetPassword = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
@@ -25,7 +30,7 @@ export default function SetPassword() {
       });
       if (data?.setPassword) {
         alert(data.setPassword);
-        await sendPasswordChangeEmail({ variables: { email } });
+        await refetch(); 
         navigate("/signin");
       }
     } catch (err: any) {
@@ -72,8 +77,7 @@ export default function SetPassword() {
               className="form-control"
               placeholder="Email"
               value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
+              readOnly
             />
           </div>
           <div className="mb-3 input-container">

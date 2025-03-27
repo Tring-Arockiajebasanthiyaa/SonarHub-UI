@@ -11,7 +11,11 @@ export const CHECK_AUTH = gql`
   }
 `;
 
-
+export const GET_SIGNUP_EMAIL = gql`
+  query GetSignupEmail {
+    getSignupEmail
+  }
+`;
 export const VALIDATE_AUTH = gql`
   query  validateAuth($onlyStatus: Boolean) {
      validateAuth(onlyStatus: $onlyStatus) {
