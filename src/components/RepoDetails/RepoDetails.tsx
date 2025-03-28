@@ -91,9 +91,97 @@ const RepoDetails = () => {
       animate={{ opacity: 1 }}
       transition={{ duration: 0.6 }}
     >
-      {/* ... rest of your component remains the same ... */}
+        <div className="flex justify-between items-center mb-6">
+        <h1 className="text-2xl font-bold">
+          SonarQube Analysis for {repoName}
+          {branchName && ` (${branchName})`}
+        </h1>
+        <div className="flex space-x-4">
+          <select
+            value={branchName}
+            onChange={(e) => setBranchName(e.target.value)}
+            className="px-3 py-2 border rounded"
+          >
+            <option value="main">main</option>
+            <option value="develop">develop</option>
+            <option value="master">master</option>
+          </select>
+          <button
+            onClick={handleReanalyze}
+            className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+          >
+            Reanalyze
+          </button>
+        </div>
+      </div>
+
+      <div className="mb-6 p-4 bg-gray-100 rounded-lg">
+        <h2 className="text-lg font-semibold mb-2">Analysis Summary</h2>
+        <p>
+          Status:{" "}
+          <span
+            className={`font-medium ${
+              projectResult.includes("failed")
+                ? "text-red-500"
+                : projectResult.includes("success")
+                ? "text-green-500"
+                : "text-blue-500"
+            }`}
+          >
+            {projectResult}
+          </span>
+        </p>
+        <p>Total Issues Found: {issues.length}</p>
+      </div>
+
+      {issues.length > 0 ? (
+        <motion.div
+          className="space-y-4"
+          initial="hidden"
+          animate="visible"
+          variants={{
+            hidden: { opacity: 0, y: 10 },
+            visible: {
+              opacity: 1,
+              y: 0,
+              transition: { staggerChildren: 0.1 },
+            },
+          }}
+        >
+          {issues.map((issue: SonarIssue, index: number) => (
+            <motion.div
+              key={`${issue.hash}-${index}`}
+              className="p-4 bg-white rounded-lg shadow hover:shadow-md transition-shadow"
+              whileHover={{ scale: 1.01 }}
+              variants={{
+                hidden: { opacity: 0, x: -20 },
+                visible: { opacity: 1, x: 0 },
+              }}
+            >
+              <h3 className="text-md font-semibold">Issue {index + 1}</h3>
+              <p><strong>Severity:</strong> {issue.severity}</p>
+              <p><strong>Message:</strong> {issue.message}</p>
+              {/* <p><strong>File:</strong> {issue.filePath} (Line {issue.line})</p> */}
+              <p><strong>Rule:</strong> {issue.rule}</p>
+              <p><strong>Status:</strong> {issue.status}</p>
+            </motion.div>
+          ))}
+        </motion.div>
+      ) : (
+        <motion.div
+          className="p-8 text-center bg-green-50 rounded-lg"
+          initial={{ opacity: 0, scale: 0.8 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.6, ease: "easeOut" }}
+        >
+          <p className="text-green-600 font-medium text-lg">
+            🎉 No issues found. Great job! 🎉
+          </p>
+        </motion.div>
+      )}
     </motion.div>
   );
 };
+   
 
 export default RepoDetails;
