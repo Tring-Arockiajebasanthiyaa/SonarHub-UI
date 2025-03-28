@@ -120,9 +120,18 @@ mutation SaveSonarIssues($githubUsername: String!, $repoName: String!, $issues: 
 }
 `;
 
-export const GET_SONAR_ISSUES = gql`
-  query GetSonarIssues($githubUsername: String!, $repoName: String!) {
-    getSonarIssues(githubUsername: $githubUsername, repoName: $repoName) {
+
+export const ANALYZE_REPO = gql`
+  query AnalyzeRepo(
+    $githubUsername: String!
+    $repoName: String!
+    $branchName: String
+  ) {
+    analyzeRepo(
+      githubUsername: $githubUsername
+      repoName: $repoName
+      branchName: $branchName
+    ) {
       type
       severity
       message
@@ -137,12 +146,12 @@ export const GET_SONAR_ISSUES = gql`
       hash
       textRange
       flows
-      createdAt
       project {
+        u_id
         title
-        description
+        repoName
+        result
       }
     }
   }
 `;
-
