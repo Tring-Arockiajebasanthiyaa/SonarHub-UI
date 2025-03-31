@@ -116,12 +116,14 @@ mutation SendPasswordChangeEmail($email: String!) {
 }
 `;
 
-
-
-
-export const TRIGGER_AUTOMATIC_ANALYSIS = gql`
-  mutation TriggerAutomaticAnalysis($githubUsername: String!) {
-    triggerAutomaticAnalysis(githubUsername: $githubUsername)
+export const GET_LINES_OF_CODE_REPORT = gql`
+  query GetLinesOfCodeReport($githubUsername: String!, $repoName: String!) {
+    getLinesOfCodeReport(githubUsername: $githubUsername, repoName: $repoName) {
+      totalLines
+      sonarQubeLines
+      languageDistribution
+      lastUpdated
+    }
   }
 `;
 
