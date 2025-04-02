@@ -2,19 +2,42 @@ import { useQuery } from "@apollo/client";
 import { useParams } from "react-router-dom";
 import { useAuth } from "../../Context/AuthContext";
 import { useEffect, useState } from "react";
-import { GET_USER, GET_SONAR_ISSUES } from "../Graphql/Queries";
-import { SonarIssuesResponse } from "./types";
+import { GET_USER, ANALYZE_REPO } from "../Graphql/Queries";
+import { SonarIssuesResponse, SonarIssue } from "./types";
 import { motion } from "framer-motion";
 
 const RepoDetails = () => {
   const { repoName } = useParams<{ repoName: string }>();
   const { userEmail } = useAuth();
   const [githubUsername, setGithubUsername] = useState<string | null>(null);
+  const [branchName, setBranchName] = useState<string>("main");
+  const [analysisStatus, setAnalysisStatus] = useState<string>("");
+  const [lastError, setLastError] = useState<string | null>(null);
 
   const { data: userData } = useQuery(GET_USER, {
     variables: { email: userEmail },
     skip: !userEmail,
   });
+
+  const { data, loading, error, refetch } = useQuery<SonarIssuesResponse>(
+    ANALYZE_REPO,
+    {
+      variables: {
+        githubUsername: githubUsername || "",
+        repoName: repoName || "",
+        branchName: branchName,
+      },
+      skip: !repoName || !githubUsername,
+      onCompleted: () => {
+        setAnalysisStatus("Analysis complete");
+        setLastError(null);
+      },
+      onError: (err) => {
+        setAnalysisStatus("Analysis failed");
+        setLastError(err.message);
+      },
+    }
+  );
 
   useEffect(() => {
     if (userData?.getUserByEmail?.username) {
@@ -22,35 +45,97 @@ const RepoDetails = () => {
     }
   }, [userData]);
 
-  const { data, loading, error } = useQuery<SonarIssuesResponse>(
-    GET_SONAR_ISSUES,
-    {
-      variables: {
-        githubUsername: githubUsername || "arockiyajebasanthiya",
-        repoName: repoName || "",
-      },
-      skip: !repoName,
-    }
-  );
+  const handleReanalyze = () => {
+    setAnalysisStatus("Analyzing...");
+    setLastError(null);
+    refetch();
+  };
 
   if (loading)
-    return <div className="p-6">Loading issues...</div>;
-  if (error)
-    return <div className="p-6 text-red-500">Error: {error.message}</div>;
+    return (
+      <div className="p-6">
+        <div className="flex items-center space-x-2">
+          <div className="w-4 h-4 rounded-full bg-blue-500 animate-pulse"></div>
+          <span>{analysisStatus || "Loading analysis..."}</span>
+        </div>
+      </div>
+    );
 
-  const issues = data?.getSonarIssues || [];
+  if (error || lastError)
+    return (
+      <div className="p-6">
+        <div className="text-red-500 mb-4">
+          Error: {lastError || error?.message}
+          {error?.message.includes("report parameter is missing") && (
+            <div className="mt-2 text-sm text-gray-600">
+              Tip: The analysis requires a 'report' parameter that wasn't provided.
+            </div>
+          )}
+        </div>
+        <button
+          onClick={handleReanalyze}
+          className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+        >
+          Retry Analysis
+        </button>
+      </div>
+    );
+
+  const issues: SonarIssue[] = data?.analyzeRepo || [];
+  const projectResult = issues[0]?.project?.result || "No analysis results";
 
   return (
-    <motion.div 
+    <motion.div
       className="p-6"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.6 }}
     >
-      <h1 className="text-2xl font-bold mb-6 text-center">SonarQube Analysis for {repoName}</h1>
+        <div className="flex justify-between items-center mb-6">
+        <h1 className="text-2xl font-bold">
+          SonarQube Analysis for {repoName}
+          {branchName && ` (${branchName})`}
+        </h1>
+        <div className="flex space-x-4">
+          <select
+            value={branchName}
+            onChange={(e) => setBranchName(e.target.value)}
+            className="px-3 py-2 border rounded"
+          >
+            <option value="main">main</option>
+            <option value="develop">develop</option>
+            <option value="master">master</option>
+          </select>
+          <button
+            onClick={handleReanalyze}
+            className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+          >
+            Reanalyze
+          </button>
+        </div>
+      </div>
+
+      <div className="mb-6 p-4 bg-gray-100 rounded-lg">
+        <h2 className="text-lg font-semibold mb-2">Analysis Summary</h2>
+        <p>
+          Status:{" "}
+          <span
+            className={`font-medium ${
+              projectResult.includes("failed")
+                ? "text-red-500"
+                : projectResult.includes("success")
+                ? "text-green-500"
+                : "text-blue-500"
+            }`}
+          >
+            {projectResult}
+          </span>
+        </p>
+        <p>Total Issues Found: {issues.length}</p>
+      </div>
 
       {issues.length > 0 ? (
-        <motion.div 
+        <motion.div
           className="space-y-4"
           initial="hidden"
           animate="visible"
@@ -59,81 +144,26 @@ const RepoDetails = () => {
             visible: {
               opacity: 1,
               y: 0,
-              transition: { staggerChildren: 0.2 },
+              transition: { staggerChildren: 0.1 },
             },
           }}
         >
-          {issues.map((issue, index) => (
+          {issues.map((issue: SonarIssue, index: number) => (
             <motion.div
-              key={index}
+              key={`${issue.hash}-${index}`}
               className="p-4 bg-white rounded-lg shadow hover:shadow-md transition-shadow"
-              whileHover={{ scale: 1.02 }}
+              whileHover={{ scale: 1.01 }}
               variants={{
                 hidden: { opacity: 0, x: -20 },
                 visible: { opacity: 1, x: 0 },
               }}
             >
-              <div className="flex items-start gap-4">
-                <div
-                  className={`w-3 h-3 mt-1 rounded-full flex-shrink-0 ${
-                    issue.severity === "BLOCKER"
-                      ? "bg-red-500"
-                      : issue.severity === "CRITICAL"
-                      ? "bg-orange-500"
-                      : issue.severity === "MAJOR"
-                      ? "bg-yellow-500"
-                      : "bg-blue-500"
-                  }`}
-                ></div>
-
-                <div className="flex-1">
-                  <div className="flex justify-between items-start">
-                    <p className="font-medium text-gray-800">{issue.message}</p>
-                    <span className="text-xs px-2 py-1 rounded bg-gray-100 text-gray-600">
-                      {issue.severity}
-                    </span>
-                  </div>
-
-                  <div className="mt-3 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 text-sm text-gray-600">
-                    <div>
-                      <span className="font-semibold">Type:</span> {issue.type}
-                    </div>
-                    <div>
-                      <span className="font-semibold">Rule:</span> {issue.rule}
-                    </div>
-                    <div>
-                      <span className="font-semibold">Location:</span>{" "}
-                      {issue.component}
-                      {issue.line && `:${issue.line}`}
-                    </div>
-                    {issue.effort && (
-                      <div>
-                        <span className="font-semibold">Effort:</span>{" "}
-                        {issue.effort}
-                      </div>
-                    )}
-                    {issue.author && (
-                      <div>
-                        <span className="font-semibold">Author:</span>{" "}
-                        {issue.author}
-                      </div>
-                    )}
-                    {issue.status && (
-                      <div>
-                        <span className="font-semibold">Status:</span>{" "}
-                        {issue.status}
-                      </div>
-                    )}
-                  </div>
-
-                  {issue.textRange && (
-                    <div className="mt-2 p-2 bg-gray-50 rounded text-xs">
-                      <span className="font-semibold">Code Context:</span>
-                      <pre className="mt-1 overflow-x-auto">{issue.textRange}</pre>
-                    </div>
-                  )}
-                </div>
-              </div>
+              <h3 className="text-md font-semibold">Issue {index + 1}</h3>
+              <p><strong>Severity:</strong> {issue.severity}</p>
+              <p><strong>Message:</strong> {issue.message}</p>
+              {/* <p><strong>File:</strong> {issue.filePath} (Line {issue.line})</p> */}
+              <p><strong>Rule:</strong> {issue.rule}</p>
+              <p><strong>Status:</strong> {issue.status}</p>
             </motion.div>
           ))}
         </motion.div>
@@ -152,5 +182,6 @@ const RepoDetails = () => {
     </motion.div>
   );
 };
+   
 
 export default RepoDetails;
