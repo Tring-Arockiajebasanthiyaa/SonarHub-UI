@@ -19,20 +19,21 @@ const CHECK_AUTH = gql`
 const LandingPage: React.FC = () => {
   const navigate = useNavigate();
   const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
-  const [showVideo, setShowVideo] = useState(false); // Toggle video state
+  const [showVideo, setShowVideo] = useState(false); 
 
   const { data, loading, error } = useQuery(CHECK_AUTH, {
     variables: { onlyStatus: true },
   });
 
   useEffect(() => {
-    if (!loading && !error && data?.checkAuth) {
+    if (!loading && !error && data?.checkAuth?.isAuthenticated !== undefined) {
       setIsAuthenticated(data.checkAuth.isAuthenticated);
-      if (data.checkAuth.isAuthenticated) {
-        navigate("/dashboard");
+      if (!data.checkAuth.isAuthenticated) {
+        navigate("/", { replace: true });
       }
     }
-  }, [data, loading, error, navigate]);
+  }, [loading, error, data?.checkAuth?.isAuthenticated, navigate]);
+  
 
   if (showVideo) {
     return (

@@ -85,9 +85,11 @@ query GetUserByEmail($email: String!) {
   getUserByEmail(email: $email) {
     name
     username
+    githubAccessToken
   }
 }
 `;
+
 export const GET_SCAN_RESULTS = gql`
   query GetUserScanResults($username: String!) {
     getUserScanResults(username: $username) {
@@ -114,43 +116,53 @@ mutation SendPasswordChangeEmail($email: String!) {
 }
 `;
 
-export const SAVE_SONAR_ISSUES = gql`
-mutation SaveSonarIssues($githubUsername: String!, $repoName: String!, $issues: [SonarIssueInput!]!) {
-  saveSonarIssues(githubUsername: $githubUsername, repoName: $repoName, issues: $issues)
-}
+export const GET_LINES_OF_CODE_REPORT = gql`
+  query GetLinesOfCodeReport($githubUsername: String!, $repoName: String!) {
+    getLinesOfCodeReport(githubUsername: $githubUsername, repoName: $repoName) {
+      totalLines
+      sonarQubeLines
+      languageDistribution
+      lastUpdated
+    }
+  }
 `;
 
-
-export const ANALYZE_REPO = gql`
-  query AnalyzeRepo(
-    $githubUsername: String!
-    $repoName: String!
-    $branchName: String
-  ) {
-    analyzeRepo(
-      githubUsername: $githubUsername
-      repoName: $repoName
-      branchName: $branchName
-    ) {
-      type
-      severity
-      message
-      rule
-      component
-      line
-      effort
-      debt
-      author
-      status
-      resolution
-      hash
-      textRange
-      flows
-      project {
+export const GET_PROJECT_ANALYSIS = gql`
+  query GetProjectAnalysis($githubUsername: String!, $repoName: String!) {
+    getProjectAnalysis(githubUsername: $githubUsername, repoName: $repoName) {
+      u_id
+      title
+      repoName
+      description
+      githubUrl
+      isPrivate
+      defaultBranch
+      lastAnalysisDate
+      result
+      sonarIssues {
         u_id
-        title
-        repoName
-        result
+        key
+        type
+        severity
+        message
+        rule
+        component
+        line
+        status
+        resolution
+        createdAt
+      }
+      codeMetrics {
+        u_id
+        branch
+        language
+        linesOfCode
+        filesCount
+        coverage
+        duplicatedLines
+        violations
+        complexity
+        createdAt
       }
     }
   }

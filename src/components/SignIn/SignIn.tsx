@@ -37,8 +37,6 @@ export default function SignIn() {
       if (data?.signIn) {
         localStorage.setItem("authToken", data.signIn);
         localStorage.setItem("userEmail", email);
-        
-        // Update AuthContext state
         setAuthToken(data.signIn);
         setUserEmail(email);
         setIsAuthenticated(true);
