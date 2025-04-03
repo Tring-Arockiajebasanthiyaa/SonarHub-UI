@@ -66,7 +66,7 @@ const SonarRepo = () => {
           </tr>
         </thead>
         <tbody>
-          {data?.getUserRepositories.map((repo: any) => (
+          {data?.getUserRepositories?.map((repo: any) => (
             <motion.tr
               key={repo.name}
               onClick={() => navigate(`/dashboard/repo/${repo.name}`)}
@@ -75,7 +75,7 @@ const SonarRepo = () => {
               transition={{ duration: 0.2 }}
             >
               <td>{repo.name}</td>
-              <td>{repo.owner}</td>
+              <td>{repo.owner?.username || "Unknown"}</td>
               <td>{repo.language || "-"}</td>
               <td>{repo.stars || 0}</td>
               <td>{repo.totalCommits || 0}</td>

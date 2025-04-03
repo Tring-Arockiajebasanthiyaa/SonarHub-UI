@@ -69,14 +69,16 @@ export const GET_USER_ACTIVITY = gql`
 
 export const GET_REPOSITORIES = gql`
   query GetUserRepositories($username: String!) {
-    getUserRepositories(username: $username) {
-       name
-    owner
+  getUserRepositories(username: $username) {
+    name
     language
     stars
     totalCommits
+    owner {
+      username
     }
   }
+ }
 `;
 
 
@@ -128,20 +130,48 @@ export const GET_LINES_OF_CODE_REPORT = gql`
 `;
 
 export const GET_PROJECT_ANALYSIS = gql`
-  query GetProjectAnalysis($githubUsername: String!, $repoName: String!) {
-    getProjectAnalysis(githubUsername: $githubUsername, repoName: $repoName) {
-      u_id
-      title
-      repoName
-      description
-      githubUrl
-      isPrivate
-      defaultBranch
-      lastAnalysisDate
-      result
+  query GetProjectAnalysis($githubUsername: String!, $repoName: String!, $branch: String) {
+    getProjectAnalysis(githubUsername: $githubUsername, repoName: $repoName, branch: $branch) {
+      project {
+        u_id
+        title
+        repoName
+        description
+        githubUrl
+        isPrivate
+        defaultBranch
+        lastAnalysisDate
+        analysisDuration
+        result
+        estimatedLinesOfCode
+        languageDistribution
+      }
+      branches {
+        name
+        dashboardUrl
+      }
+      codeMetrics {
+        u_id
+        branch
+        language
+        linesOfCode
+        coverage
+        duplicatedLines
+        violations
+        filesCount
+        complexity
+        reliabilityRating
+        securityRating
+        bugs
+        vulnerabilities
+        codeSmells
+        debtRatio
+        qualityGateStatus
+      }
       sonarIssues {
         u_id
         key
+        branch
         type
         severity
         message
@@ -150,20 +180,22 @@ export const GET_PROJECT_ANALYSIS = gql`
         line
         status
         resolution
-        createdAt
       }
-      codeMetrics {
-        u_id
-        branch
-        language
-        linesOfCode
-        filesCount
-        coverage
-        duplicatedLines
-        violations
-        complexity
-        createdAt
+      locReport {
+        totalLines
+        sonarQubeLines
+        languageDistribution
+        lastUpdated
       }
+    }
+  }
+`;
+
+export const GET_REPO_BRANCHES = gql`
+  query GetRepoBranches($githubUsername: String!, $repoName: String!) {
+    getRepoBranches(githubUsername: $githubUsername, repoName: $repoName) {
+      name
+      dashboardUrl
     }
   }
 `;
