@@ -145,6 +145,11 @@ export const GET_PROJECT_ANALYSIS = gql`
         result
         estimatedLinesOfCode
         languageDistribution
+        user {
+          name
+          email
+          githubId
+        }
       }
       branches {
         name
@@ -180,6 +185,12 @@ export const GET_PROJECT_ANALYSIS = gql`
         line
         status
         resolution
+        createdAt
+        project {
+          u_id
+          title
+          repoName
+        }
       }
       locReport {
         totalLines

@@ -5,7 +5,11 @@ import { useEffect, useState } from "react";
 import { GET_USER, GET_PROJECT_ANALYSIS, GET_REPO_BRANCHES } from "../Graphql/Queries";
 import { motion } from "framer-motion";
 import { TRIGGER_AUTOMATIC_ANALYSIS, ANALYZE_SINGLE_REPOSITORY } from "../Graphql/Mutations";
-import { Badge, ProgressBar, Spinner, Alert, Card, ListGroup, Dropdown } from "react-bootstrap";
+import { Badge, ProgressBar, Spinner, Alert, Card, ListGroup, Dropdown, Tab, Tabs, Table } from "react-bootstrap";
+import { FaGithub, FaCode, FaBug, FaShieldAlt, FaExclamationTriangle, FaClock, FaChartLine, FaLanguage, FaCodeBranch } from "react-icons/fa";
+import { GiSpiderWeb } from "react-icons/gi";
+import { RiGitRepositoryLine } from "react-icons/ri";
+import { BsGraphUp, BsFileCode } from "react-icons/bs";
 
 interface CodeMetric {
   u_id: string;
@@ -37,7 +41,13 @@ interface SonarIssue {
   line: number;
   status: string;
   resolution?: string;
-  branch: string | null;
+  branch: string;
+  createdAt: string;
+  project: {
+    u_id: string;
+    title: string;
+    repoName: string;
+  };
 }
 
 interface ProjectAnalysis {
@@ -45,26 +55,17 @@ interface ProjectAnalysis {
   title: string;
   repoName: string;
   description: string | null;
-  overview: string | null;
   result: string;
   githubUrl: string;
   isPrivate: boolean;
   defaultBranch: string;
   lastAnalysisDate: string;
-  username: string;
-  analysisStartTime: string;
-  analysisEndTime: string;
   analysisDuration: number;
   estimatedLinesOfCode: number;
   languageDistribution: Record<string, number>;
-  createdAt: string;
-  updatedAt: string;
   user: {
-    u_id: string;
     name: string;
     email: string;
-    avatar: string | null;
-    username: string;
     githubId: string;
   };
 }
@@ -117,6 +118,8 @@ const RepoDetails = () => {
       branch: selectedBranch
     },
     skip: !githubUsername || !cleanRepoName || !selectedBranch,
+    fetchPolicy: 'network-only',
+    notifyOnNetworkStatusChange: true,
     onError: (err) => {
       setLastError(err.message);
     }
@@ -169,8 +172,17 @@ const RepoDetails = () => {
     triggerAutomaticAnalysis({ variables: { githubUsername } });
   };
 
-  const handleBranchChange = (branch: string) => {
+  const handleBranchChange = async (branch: string) => {
     setSelectedBranch(branch);
+    try {
+      await refetch({ 
+        githubUsername, 
+        repoName: cleanRepoName, 
+        branch 
+      });
+    } catch (err: any) {
+      setLastError(err.message);
+    }
   };
 
   const getSeverityVariant = (severity: string) => {
@@ -195,70 +207,208 @@ const RepoDetails = () => {
     return colors[language] || 'info';
   };
 
+  const LoadingScreen = ({ message = "Loading repository data..." }: { message?: string }) => {
+    const loadingMessages = [
+      "Analyzing code quality...",
+      "Checking for vulnerabilities...",
+      "Calculating metrics...",
+      "Scanning for code smells...",
+      "Generating reports..."
+    ];
+    const [currentMessage, setCurrentMessage] = useState(message);
+    
+    useEffect(() => {
+      if (message === "Loading repository data...") {
+        const interval = setInterval(() => {
+          setCurrentMessage(loadingMessages[Math.floor(Math.random() * loadingMessages.length)]);
+        }, 3000);
+        return () => clearInterval(interval);
+      }
+    }, [message]);
+
+    return (
+      <motion.div 
+        className="container py-5 text-center text-white"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        style={{ backgroundColor: '#1a1a2e', minHeight: '80vh' }}
+      >
+        <motion.div
+          animate={{
+            scale: [1, 1.1, 1],
+            rotate: [0, 5, -5, 0],
+          }}
+          transition={{
+            duration: 2,
+            ease: "easeInOut",
+            repeat: Infinity,
+            repeatType: "reverse"
+          }}
+        >
+          <GiSpiderWeb size={80} className="text-primary mb-4" />
+        </motion.div>
+        
+        <h3 className="mb-4">{currentMessage}</h3>
+        
+        <div className="d-flex justify-content-center mb-4">
+          <Spinner animation="grow" variant="primary" className="me-3" />
+          <Spinner animation="grow" variant="success" className="me-3" />
+          <Spinner animation="grow" variant="info" className="me-3" />
+          <Spinner animation="grow" variant="warning" />
+        </div>
+        
+        <motion.div
+          initial={{ width: 0 }}
+          animate={{ width: "60%" }}
+          transition={{ duration: 2, repeat: Infinity, repeatType: "reverse" }}
+          className="progress mx-auto mb-4"
+          style={{ height: '8px', maxWidth: '400px' }}
+        >
+          <div 
+            className="progress-bar progress-bar-striped progress-bar-animated bg-primary" 
+            style={{ width: '100%' }}
+          />
+        </motion.div>
+        
+        <div className="text-muted">
+          <small>Fetching data from {repoName} repository...</small>
+        </div>
+      </motion.div>
+    );
+  };
+
   if (!repoName) return <div className="container py-4"><Alert variant="danger">Repository name missing</Alert></div>;
 
-  if (branchesLoading) {
-    return (
-      <div className="container py-4 text-white" style={{ backgroundColor: '#1a1a2e' }}>
-        <div className="d-flex align-items-center">
-          <Spinner animation="border" variant="primary" className="me-3" />
-          <span className="fs-5">Loading branches...</span>
-        </div>
-      </div>
-    );
+  if (branchesLoading || (loading && !data)) {
+    return <LoadingScreen />;
   }
 
   if (branchesError) {
     return (
-      <div className="container py-4 text-white" style={{ backgroundColor: '#1a1a2e' }}>
-        <Alert variant="danger">
-          <h5>Error Loading Branches</h5>
-          <p>{branchesError.message}</p>
-          <button onClick={() => window.location.reload()} className="btn btn-primary">
-            Retry
+      <motion.div
+        className="container py-4 text-white"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        style={{ backgroundColor: '#1a1a2e', minHeight: '80vh' }}
+      >
+        <div className="text-center py-5">
+          <motion.div
+            animate={{
+              scale: [1, 1.2, 1],
+              rotate: [0, 10, -10, 0],
+            }}
+            transition={{
+              duration: 1.5,
+              ease: "easeInOut",
+            }}
+          >
+            <FaExclamationTriangle size={80} className="text-danger mb-4" />
+          </motion.div>
+          <h3 className="mb-3">Error Loading Branches</h3>
+          <p className="lead mb-4">{branchesError.message}</p>
+          <button 
+            onClick={() => window.location.reload()} 
+            className="btn btn-primary btn-lg"
+          >
+            <i className="bi bi-arrow-clockwise me-2"></i>Retry
           </button>
-        </Alert>
-      </div>
-    );
-  }
-
-  if (loading || isAnalyzing || isAnalyzingAll) {
-    return (
-      <div className="container py-4 text-white" style={{ backgroundColor: '#1a1a2e' }}>
-        <div className="d-flex align-items-center">
-          <Spinner animation="border" variant="primary" className="me-3" />
-          <span className="fs-5">{analysisStatus || "Loading..."}</span>
         </div>
-      </div>
+      </motion.div>
     );
   }
 
   if (error || lastError) {
     return (
-      <div className="container py-4 text-white" style={{ backgroundColor: '#1a1a2e' }}>
-        <Alert variant="danger" className="mb-4">
-          <h5>Error</h5>
-          {lastError || error?.message}
-        </Alert>
-        <div className="d-flex gap-3">
-          <button onClick={handleReanalyze} className="btn btn-primary" disabled={isAnalyzing}>
-            {lastError?.includes("not found") ? "Analyze Now" : "Retry"}
-          </button>
-          {githubUsername && (
-            <button onClick={handleAnalyzeAllRepos} className="btn btn-success" disabled={isAnalyzingAll}>
-              Analyze All
+      <motion.div
+        className="container py-4 text-white"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        style={{ backgroundColor: '#1a1a2e', minHeight: '80vh' }}
+      >
+        <div className="text-center py-5">
+          <motion.div
+            animate={{
+              scale: [1, 1.1, 1],
+              rotate: [0, 5, -5, 0],
+            }}
+            transition={{
+              duration: 1.5,
+              ease: "easeInOut",
+              repeat: Infinity,
+              repeatType: "reverse"
+            }}
+          >
+            <FaBug size={80} className="text-warning mb-4" />
+          </motion.div>
+          <h3 className="mb-3">Analysis Error</h3>
+          <p className="lead mb-4">{lastError || error?.message}</p>
+          <div className="d-flex justify-content-center gap-3">
+            <button 
+              onClick={handleReanalyze} 
+              className="btn btn-primary btn-lg"
+              disabled={isAnalyzing}
+            >
+              {isAnalyzing ? (
+                <>
+                  <Spinner as="span" animation="border" size="sm" className="me-2" />
+                  Processing...
+                </>
+              ) : (
+                <>
+                  <i className="bi bi-arrow-repeat me-2"></i>
+                  {lastError?.includes("not found") ? "Analyze Now" : "Retry"}
+                </>
+              )}
             </button>
-          )}
+            {githubUsername && (
+              <button 
+                onClick={handleAnalyzeAllRepos} 
+                className="btn btn-success btn-lg"
+                disabled={isAnalyzingAll}
+              >
+                {isAnalyzingAll ? (
+                  <>
+                    <Spinner as="span" animation="border" size="sm" className="me-2" />
+                    Analyzing...
+                  </>
+                ) : (
+                  <>
+                    <i className="bi bi-collection me-2"></i>
+                    Analyze All
+                  </>
+                )}
+              </button>
+            )}
+          </div>
         </div>
-      </div>
+      </motion.div>
     );
   }
 
-  const project = data?.getProjectAnalysis?.project;
-  const metrics = data?.getProjectAnalysis?.codeMetrics || [];
-  const issues = data?.getProjectAnalysis?.sonarIssues || [];
-  const branchMetrics = metrics.find((m: CodeMetric) => m.branch === selectedBranch);
-  const branchIssues = issues.filter((i: SonarIssue) => i.branch === selectedBranch);
+  const projectAnalysis = data?.getProjectAnalysis;
+  const project = projectAnalysis?.project;
+  const branches = projectAnalysis?.branches || [];
+  const allCodeMetrics = projectAnalysis?.codeMetrics || [];
+  const allSonarIssues = projectAnalysis?.sonarIssues || [];
+  const locReport = projectAnalysis?.locReport || {};
+
+  const branchMetrics = allCodeMetrics.find((m: CodeMetric) => m.branch === selectedBranch);
+  const branchIssues = allSonarIssues.filter((i: SonarIssue) => i.branch === selectedBranch);
+  const currentBranch = branches.find((b: Branch) => b.name === selectedBranch);
+
+  if (!project) {
+    return (
+      <div className="container py-4 text-white" style={{ backgroundColor: '#1a1a2e' }}>
+        <Alert variant="warning">
+          <h5>No Analysis Data Found</h5>
+          <p>This repository hasn't been analyzed yet.</p>
+          <button onClick={handleAnalyzeRepository} className="btn btn-primary" disabled={isAnalyzing}>
+            Analyze Now
+          </button>
+        </Alert>
+      </div>
+    );
+  }
 
   return (
     <motion.div
@@ -269,11 +419,26 @@ const RepoDetails = () => {
     >
       <div className="d-flex justify-content-between align-items-center mb-4">
         <div>
-          <h1 className="mb-1">
+          <h1 className="mb-1 d-flex align-items-center">
+            <RiGitRepositoryLine className="me-2" />
             {project?.title || repoName}
-            {selectedBranch && <Badge bg="light" text="dark" className="ms-2">{selectedBranch}</Badge>}
+            {selectedBranch && (
+              <Badge bg="light" text="dark" className="ms-2">
+                <FaCodeBranch className="me-1" />
+                {selectedBranch}
+              </Badge>
+            )}
           </h1>
-          {project?.description && <p className="text-light mb-0">{project.description}</p>}
+          {project?.description && (
+            <motion.p 
+              className="text-light mb-0"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.3 }}
+            >
+              {project.description}
+            </motion.p>
+          )}
         </div>
         <div className="d-flex gap-2">
           <Dropdown>
@@ -307,28 +472,23 @@ const RepoDetails = () => {
       <div className="row g-4 mb-4">
         <div className="col-md-4">
           <Card className="h-100 bg-dark border-secondary">
-            <Card.Header className="bg-primary text-white">
-              <h5>Repository Info</h5>
+            <Card.Header className="bg-primary text-white d-flex align-items-center">
+              <FaGithub className="me-2" />
+              <h5 className="mb-0">Repository Info</h5>
             </Card.Header>
             <Card.Body>
               <ListGroup variant="flush" className="bg-transparent">
                 <ListGroup.Item className="bg-transparent text-light border-secondary">
-                  <strong>Owner:</strong> {project?.user?.name || project?.username || 'Unknown'}
+                  <strong>Title:</strong> {project?.title || 'N/A'}
                 </ListGroup.Item>
                 <ListGroup.Item className="bg-transparent text-light border-secondary">
-                  <strong>GitHub ID:</strong> {project?.user?.githubId || 'Unknown'}
-                </ListGroup.Item>
-                <ListGroup.Item className="bg-transparent text-light border-secondary">
-                  <strong>Email:</strong> {project?.user?.email || 'Unknown'}
+                  <strong>Description:</strong> {project?.description || 'None'}
                 </ListGroup.Item>
                 <ListGroup.Item className="bg-transparent text-light border-secondary">
                   <strong>URL:</strong>{' '}
                   <a href={project?.githubUrl} target="_blank" rel="noopener noreferrer" className="text-info">
-                    {project?.githubUrl}
+                    {project?.githubUrl || 'N/A'}
                   </a>
-                </ListGroup.Item>
-                <ListGroup.Item className="bg-transparent text-light border-secondary">
-                  <strong>Default Branch:</strong> {project?.defaultBranch || 'master'}
                 </ListGroup.Item>
                 <ListGroup.Item className="bg-transparent text-light border-secondary">
                   <strong>Visibility:</strong>{' '}
@@ -337,94 +497,138 @@ const RepoDetails = () => {
                   </Badge>
                 </ListGroup.Item>
                 <ListGroup.Item className="bg-transparent text-light border-secondary">
-                  <strong>Created:</strong>{' '}
-                  {project?.createdAt ? new Date(project.createdAt).toLocaleString() : 'Unknown'}
+                  <strong>Owner:</strong> {project?.user?.name || 'N/A'}
                 </ListGroup.Item>
                 <ListGroup.Item className="bg-transparent text-light border-secondary">
-                  <strong>Last Updated:</strong>{' '}
-                  {project?.updatedAt ? new Date(project.updatedAt).toLocaleString() : 'Never'}
+                  <strong>Email:</strong> {project?.user?.email || 'N/A'}
                 </ListGroup.Item>
               </ListGroup>
             </Card.Body>
           </Card>
         </div>
 
-        {branchMetrics && (
-          <div className="col-md-4">
-            <Card className="h-100 bg-dark border-secondary">
-              <Card.Header className="bg-primary text-white">
-                <h5>Code Metrics</h5>
-              </Card.Header>
-              <Card.Body>
-                <div className="row g-3">
-                  {[
-                    { title: "Lines", value: branchMetrics.linesOfCode, format: (v: number) => v?.toLocaleString() },
-                    { title: "Files", value: branchMetrics.filesCount, format: (v: number) => v?.toLocaleString() },
-                    { 
-                      title: "Coverage", 
-                      value: branchMetrics.coverage, 
-                      format: (v: number) => `${v?.toFixed(2)}%`,
-                      progress: true,
-                      variant: branchMetrics.coverage > 80 ? 'success' : branchMetrics.coverage > 50 ? 'warning' : 'danger'
-                    },
-                    { 
-                      title: "Duplicates", 
-                      value: branchMetrics.duplicatedLines, 
-                      format: (v: number) => `${v?.toFixed(2)}%`,
-                      progress: true,
-                      variant: branchMetrics.duplicatedLines < 5 ? 'success' : branchMetrics.duplicatedLines < 15 ? 'warning' : 'danger'
-                    }
-                  ].map((metric, index) => (
-                    <div key={index} className="col-6">
-                      <Card className="h-100 bg-dark border-secondary">
-                        <Card.Body className="text-center">
-                          <h6 className="text-muted">{metric.title}</h6>
-                          {metric.progress ? (
-                            <ProgressBar 
-                              now={metric.value} 
-                              label={metric.format(metric.value)} 
-                              variant={metric.variant} 
-                              className="mt-2" 
-                            />
-                          ) : (
-                            <h4 className="mt-2">{metric.format(metric.value)}</h4>
-                          )}
-                        </Card.Body>
-                      </Card>
-                    </div>
-                  ))}
-                </div>
-              </Card.Body>
-            </Card>
-          </div>
-        )}
+        <div className="col-md-4">
+          <Card className="h-100 bg-dark border-secondary">
+            <Card.Header className="bg-primary text-white d-flex align-items-center">
+              <FaCodeBranch className="me-2" />
+              <h5 className="mb-0">Branch Details</h5>
+            </Card.Header>
+            <Card.Body>
+              <ListGroup variant="flush" className="bg-transparent">
+                <ListGroup.Item className="bg-transparent text-light border-secondary">
+                  <strong>Current Branch:</strong> {selectedBranch || 'N/A'}
+                </ListGroup.Item>
+                <ListGroup.Item className="bg-transparent text-light border-secondary">
+                  <strong>Default Branch:</strong> {project?.defaultBranch || 'master'}
+                </ListGroup.Item>
+                <ListGroup.Item className="bg-transparent text-light border-secondary">
+                  <strong>Dashboard:</strong>{' '}
+                  {currentBranch?.dashboardUrl ? (
+                    <a href={currentBranch.dashboardUrl} target="_blank" rel="noopener noreferrer" className="text-info">
+                      View Dashboard
+                    </a>
+                  ) : 'N/A'}
+                </ListGroup.Item>
+                <ListGroup.Item className="bg-transparent text-light border-secondary">
+                  <strong>Last Analyzed:</strong>{' '}
+                  {project?.lastAnalysisDate ? 
+                    new Date(project.lastAnalysisDate).toLocaleString() : 
+                    'Never'}
+                </ListGroup.Item>
+                <ListGroup.Item className="bg-transparent text-light border-secondary">
+                  <strong>Analysis Duration:</strong> {project?.analysisDuration || 0} seconds
+                </ListGroup.Item>
+                <ListGroup.Item className="bg-transparent text-light border-secondary">
+                  <strong>Result:</strong>{' '}
+                  <Badge bg={project?.result === "Analysis completed" ? "success" : "danger"}>
+                    {project?.result || "Not analyzed"}
+                  </Badge>
+                </ListGroup.Item>
+              </ListGroup>
+            </Card.Body>
+          </Card>
+        </div>
 
         <div className="col-md-4">
           <Card className="h-100 bg-dark border-secondary">
-            <Card.Header className="bg-primary text-white">
-              <h5>Lines of Code</h5>
+            <Card.Header className="bg-primary text-white d-flex align-items-center">
+              <BsGraphUp className="me-2" />
+              <h5 className="mb-0">Code Metrics</h5>
             </Card.Header>
             <Card.Body>
-              <div className="mb-4">
+              {branchMetrics ? (
+                <div className="row g-2">
+                  <div className="col-6">
+                    <div className="text-center">
+                      <h6 className="text-muted">Lines</h6>
+                      <h4>{branchMetrics.linesOfCode?.toLocaleString() || '0'}</h4>
+                    </div>
+                  </div>
+                  <div className="col-6">
+                    <div className="text-center">
+                      <h6 className="text-muted">Files</h6>
+                      <h4>{branchMetrics.filesCount?.toLocaleString() || '0'}</h4>
+                    </div>
+                  </div>
+                  <div className="col-12 mt-3">
+                    <h6 className="text-muted">Coverage</h6>
+                    <ProgressBar 
+                      now={branchMetrics.coverage || 0} 
+                      label={`${branchMetrics.coverage?.toFixed(2) || 0}%`} 
+                      variant={
+                        branchMetrics.coverage > 80 ? 'success' : 
+                        branchMetrics.coverage > 50 ? 'warning' : 'danger'
+                      } 
+                    />
+                  </div>
+                  <div className="col-12 mt-3">
+                    <h6 className="text-muted">Duplicates</h6>
+                    <ProgressBar 
+                      now={branchMetrics.duplicatedLines || 0} 
+                      label={`${branchMetrics.duplicatedLines?.toFixed(2) || 0}%`} 
+                      variant={
+                        branchMetrics.duplicatedLines < 5 ? 'success' : 
+                        branchMetrics.duplicatedLines < 15 ? 'warning' : 'danger'
+                      } 
+                    />
+                  </div>
+                  <div className="col-12 mt-3">
+                    <h6 className="text-muted">Complexity</h6>
+                    <h4>{branchMetrics.complexity?.toLocaleString() || '0'}</h4>
+                  </div>
+                </div>
+              ) : (
+                <Alert variant="info">No metrics available for this branch</Alert>
+              )}
+            </Card.Body>
+          </Card>
+        </div>
+      </div>
+
+      <div className="row g-4 mb-4">
+        <div className="col-md-6">
+          <Card className="h-100 bg-dark border-secondary">
+            <Card.Header className="bg-primary text-white d-flex align-items-center">
+              <BsFileCode className="me-2" />
+              <h5 className="mb-0">Lines of Code</h5>
+            </Card.Header>
+            <Card.Body>
+              <div className="mb-3">
                 <div className="d-flex justify-content-between mb-2 text-light">
                   <span>Total:</span>
                   <strong>{project?.estimatedLinesOfCode?.toLocaleString() || '0'}</strong>
                 </div>
                 <div className="d-flex justify-content-between mb-2 text-light">
-                  <span>Analysis Duration:</span>
-                  <strong>{project?.analysisDuration || 0} seconds</strong>
+                  <span>SonarQube Lines:</span>
+                  <strong>{locReport?.sonarQubeLines?.toLocaleString() || '0'}</strong>
                 </div>
                 <div className="d-flex justify-content-between mb-2 text-light">
-                  <span>Last Analyzed:</span>
-                  <strong>
-                    {project?.lastAnalysisDate ? 
-                      new Date(project.lastAnalysisDate).toLocaleString() : 
-                      'Never'}
-                  </strong>
+                  <span>Last Updated:</span>
+                  <strong>{locReport?.lastUpdated ? new Date(locReport.lastUpdated).toLocaleString() : 'N/A'}</strong>
                 </div>
               </div>
               
-              {project?.languageDistribution && (
+              {project?.languageDistribution && Object.keys(project.languageDistribution).length > 0 ? (
                 <>
                   <h6 className="mb-3 text-light">Languages</h6>
                   {Object.entries(project.languageDistribution)
@@ -435,20 +639,102 @@ const RepoDetails = () => {
                       return (
                         <div key={lang} className="mb-2">
                           <div className="d-flex justify-content-between mb-1 text-light">
-                            <span className="fw-bold">{lang}</span>
-                            <span>
-                              {percentage.toFixed(1)}% ({(lines as number).toLocaleString()})
-                            </span>
+                            <span>{lang}</span>
+                            {/* <span>{lines.toLocaleString()} lines ({percentage.toFixed(1)}%)</span> */}
                           </div>
                           <ProgressBar 
                             now={percentage} 
                             variant={getLanguageColor(lang)} 
-                            style={{ height: '10px' }} 
+                            style={{ height: '8px' }} 
                           />
                         </div>
                       );
                     })}
                 </>
+              ) : (
+                <Alert variant="info">No language distribution data</Alert>
+              )}
+            </Card.Body>
+          </Card>
+        </div>
+
+        <div className="col-md-6">
+          <Card className="h-100 bg-dark border-secondary">
+            <Card.Header className="bg-primary text-white d-flex align-items-center">
+              <FaShieldAlt className="me-2" />
+              <h5 className="mb-0">Quality Gate</h5>
+            </Card.Header>
+            <Card.Body>
+              {branchMetrics ? (
+                <div className="text-center">
+                  <Badge 
+                    bg={branchMetrics.qualityGateStatus === 'OK' ? 'success' : 'danger'} 
+                    className="mb-3 fs-5 p-3"
+                  >
+                    {branchMetrics.qualityGateStatus || 'UNKNOWN'}
+                  </Badge>
+                  <div className="row mt-3">
+                    <div className="col-4">
+                      <div className="text-center">
+                        <h6 className="text-muted">Bugs</h6>
+                        <h4>{branchMetrics.bugs || 0}</h4>
+                      </div>
+                    </div>
+                    <div className="col-4">
+                      <div className="text-center">
+                        <h6 className="text-muted">Vulnerabilities</h6>
+                        <h4>{branchMetrics.vulnerabilities || 0}</h4>
+                      </div>
+                    </div>
+                    <div className="col-4">
+                      <div className="text-center">
+                        <h6 className="text-muted">Code Smells</h6>
+                        <h4>{branchMetrics.codeSmells || 0}</h4>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="row mt-3">
+                    <div className="col-6">
+                      <div className="text-center">
+                        <h6 className="text-muted">Reliability Rating</h6>
+                        <h4>{branchMetrics.reliabilityRating || 0}/5</h4>
+                        <ProgressBar 
+                          now={(branchMetrics.reliabilityRating || 0) * 20} 
+                          variant={
+                            branchMetrics.reliabilityRating <= 2 ? 'success' : 
+                            branchMetrics.reliabilityRating <= 3 ? 'warning' : 'danger'
+                          }
+                        />
+                      </div>
+                    </div>
+                    <div className="col-6">
+                      <div className="text-center">
+                        <h6 className="text-muted">Security Rating</h6>
+                        <h4>{branchMetrics.securityRating || 0}/5</h4>
+                        <ProgressBar 
+                          now={(branchMetrics.securityRating || 0) * 20} 
+                          variant={
+                            branchMetrics.securityRating <= 2 ? 'success' : 
+                            branchMetrics.securityRating <= 3 ? 'warning' : 'danger'
+                          }
+                        />
+                      </div>
+                    </div>
+                  </div>
+                  <div className="mt-3">
+                    <h6 className="text-muted">Debt Ratio</h6>
+                    <h4>{branchMetrics.debtRatio?.toFixed(2) || 0}%</h4>
+                    <ProgressBar 
+                      now={branchMetrics.debtRatio || 0} 
+                      variant={
+                        branchMetrics.debtRatio < 5 ? 'success' : 
+                        branchMetrics.debtRatio < 10 ? 'warning' : 'danger'
+                      }
+                    />
+                  </div>
+                </div>
+              ) : (
+                <Alert variant="info">No quality gate data available</Alert>
               )}
             </Card.Body>
           </Card>
@@ -456,16 +742,19 @@ const RepoDetails = () => {
       </div>
 
       <Card className="mb-4 bg-dark border-secondary">
-        <Card.Header className="bg-primary text-white d-flex justify-content-between">
-          <h5>Issues ({branchIssues.length})</h5>
-          {project?.result === "Analysis failed" && <Badge bg="danger">Failed</Badge>}
+        <Card.Header className="bg-primary text-white d-flex justify-content-between align-items-center">
+          <h5 className="mb-0 d-flex align-items-center">
+            <FaExclamationTriangle className="me-2" />
+            Issues ({branchIssues.length})
+          </h5>
+          {project?.result === "Analysis failed" && <Badge bg="danger">Analysis Failed</Badge>}
         </Card.Header>
         <Card.Body className="p-0">
           {branchIssues.length > 0 ? (
             <div className="list-group list-group-flush">
               {branchIssues.map((issue: SonarIssue) => (
                 <div key={issue.u_id} className="list-group-item bg-dark text-light border-secondary">
-                  <div className="d-flex justify-content-between">
+                  <div className="d-flex justify-content-between align-items-start">
                     <div>
                       <div className="d-flex align-items-center mb-1">
                         <Badge bg={getSeverityVariant(issue.severity)} className="me-2">
@@ -482,9 +771,23 @@ const RepoDetails = () => {
                           <i className="bi bi-list-ol me-1"></i>
                           Line {issue.line}
                         </span>
+                        <span className="ms-3">
+                          <i className="bi bi-calendar me-1"></i>
+                          {new Date(issue.createdAt).toLocaleDateString()}
+                        </span>
+                        <span className="ms-3">
+                          <i className="bi bi-tag me-1"></i>
+                          {issue.type}
+                        </span>
+                        {issue.resolution && (
+                          <span className="ms-3">
+                            <i className="bi bi-check-circle me-1"></i>
+                            {issue.resolution}
+                          </span>
+                        )}
                       </div>
                     </div>
-                    <Badge bg="secondary">{issue.rule}</Badge>
+                    <Badge bg="secondary" className="text-uppercase">{issue.rule}</Badge>
                   </div>
                 </div>
               ))}
@@ -493,8 +796,74 @@ const RepoDetails = () => {
             <div className="text-center py-5">
               <i className="bi bi-check-circle-fill text-success fs-1 mb-3"></i>
               <h5 className="text-success">No issues found</h5>
+              {project?.result === "Analysis completed" && (
+                <p className="text-muted">The code analysis found no issues in this branch</p>
+              )}
             </div>
           )}
+        </Card.Body>
+      </Card>
+
+      <Card className="mb-4 bg-dark border-secondary">
+        <Card.Header className="bg-primary text-white d-flex align-items-center">
+          <FaChartLine className="me-2" />
+          <h5 className="mb-0">All Branches ({branches.length})</h5>
+        </Card.Header>
+        <Card.Body>
+          <Table striped bordered hover variant="dark">
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Status</th>
+                <th>Dashboard</th>
+                <th>Metrics</th>
+              </tr>
+            </thead>
+            <tbody>
+              {branches.map((branch: Branch) => {
+                const metrics = allCodeMetrics.find((m: CodeMetric) => m.branch === branch.name);
+                const issues = allSonarIssues.filter((i: SonarIssue) => i.branch === branch.name);
+                return (
+                  <tr key={branch.name}>
+                    <td>
+                      {branch.name}
+                      {branch.name === selectedBranch && (
+                        <Badge bg="info" className="ms-2">Current</Badge>
+                      )}
+                      {branch.name === project?.defaultBranch && (
+                        <Badge bg="primary" className="ms-2">Default</Badge>
+                      )}
+                    </td>
+                    <td>
+                      {metrics ? (
+                        <Badge bg={metrics.qualityGateStatus === 'OK' ? 'success' : 'danger'}>
+                          {metrics.qualityGateStatus || 'UNKNOWN'}
+                        </Badge>
+                      ) : 'N/A'}
+                    </td>
+                    <td>
+                      {branch.dashboardUrl ? (
+                        <a href={branch.dashboardUrl} target="_blank" rel="noopener noreferrer" className="text-info">
+                          View Dashboard
+                        </a>
+                      ) : 'N/A'}
+                    </td>
+                    <td>
+                      {metrics ? (
+                        <div className="d-flex flex-wrap gap-2">
+                          <Badge bg="secondary">{metrics.linesOfCode} LOC</Badge>
+                          <Badge bg={metrics.coverage > 80 ? 'success' : metrics.coverage > 50 ? 'warning' : 'danger'}>
+                            {metrics.coverage?.toFixed(2)}% Coverage
+                          </Badge>
+                          <Badge bg="info">{issues.length} Issues</Badge>
+                        </div>
+                      ) : 'No metrics'}
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </Table>
         </Card.Body>
       </Card>
     </motion.div>
