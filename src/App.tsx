@@ -14,7 +14,9 @@ import SonarRepo from "./components/SonarRepo/SonarRepo";
 import DashboardLayout from "./components/DashboardLayout/DashboardLayout";
 import LearnMore from "./components/LearnMore/LearnMore";
 import { AuthProvider, useAuth } from "./Context/AuthContext"; 
-
+import RepositoryCards from "./components/RepositoryPullRequests/RepositoryPullRequests";
+import RepositoryBranches from "./components/RepositoryBranches/RepositoryBranches";
+import BranchPullRequests from "./components/BranchPullRequest/BranchPullRequests";
 const PrivateRoute: React.FC = () => {
   const { isAuthenticated } = useAuth();
   console.log("PrivateRoute - isAuthenticated:", isAuthenticated);
@@ -47,6 +49,9 @@ export default function App() {
                 <Route path="sonar-repo" element={<SonarRepo />} />
                 <Route path="repo/:repoName" element={<RepoDetails />} />
                 <Route path="learn-more" element={<LearnMore />} />
+                <Route path="pull-requests" element={<RepositoryCards />} />
+                <Route path="pull-requests/:repoName/branches" element={<RepositoryBranches />} />
+                <Route path="pull-requests/:repoName/branches/:branchName/pulls" element={<BranchPullRequests />} />
               </Route>
             </Route>
             <Route path="*" element={<Navigate to="/" replace />} />

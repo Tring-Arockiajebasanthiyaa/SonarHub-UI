@@ -210,3 +210,29 @@ export const GET_REPO_BRANCHES = gql`
     }
   }
 `;
+
+export const GET_BRANCHES_BY_REPO = gql`
+  query GetBranchesByRepo($repoId: Int!) {
+    getBranchesByRepo(repoId: $repoId) {
+      id
+      name
+      repoName
+      username
+    }
+  }
+`;
+
+export const GET_PULL_REQUESTS_BY_BRANCH = gql`
+  query GetPullRequestsByBranch($branchName: String!, $repoName: String!, $githubUsername: String!) {
+    getPullRequestsByBranch(branchName: $branchName, repoName: $repoName, githubUsername: $githubUsername) {
+      pr_id
+      title
+      state
+      author
+      createdAt
+      additions
+      deletions
+      changedFiles
+    }
+  }
+`;
