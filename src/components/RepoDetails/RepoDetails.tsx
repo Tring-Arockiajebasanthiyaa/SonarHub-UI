@@ -227,12 +227,7 @@ const RepoDetails = () => {
     }, [message]);
 
     return (
-      <motion.div 
-        className="container py-5 text-center text-white"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        style={{ backgroundColor: '#1a1a2e', minHeight: '80vh' }}
-      >
+      <div className="container py-5 text-center bg-dark" style={{ minHeight: '80vh' }}>
         <motion.div
           animate={{
             scale: [1, 1.1, 1],
@@ -247,16 +242,13 @@ const RepoDetails = () => {
         >
           <GiSpiderWeb size={80} className="text-primary mb-4" />
         </motion.div>
-        
-        <h3 className="mb-4">{currentMessage}</h3>
-        
+        <h3 className="mb-4 text-white">{currentMessage}</h3>
         <div className="d-flex justify-content-center mb-4">
           <Spinner animation="grow" variant="primary" className="me-3" />
           <Spinner animation="grow" variant="success" className="me-3" />
           <Spinner animation="grow" variant="info" className="me-3" />
           <Spinner animation="grow" variant="warning" />
         </div>
-        
         <motion.div
           initial={{ width: 0 }}
           animate={{ width: "60%" }}
@@ -264,16 +256,12 @@ const RepoDetails = () => {
           className="progress mx-auto mb-4"
           style={{ height: '8px', maxWidth: '400px' }}
         >
-          <div 
-            className="progress-bar progress-bar-striped progress-bar-animated bg-primary" 
-            style={{ width: '100%' }}
-          />
+          <div className="progress-bar progress-bar-striped progress-bar-animated bg-primary w-100" />
         </motion.div>
-        
         <div className="text-muted">
           <small>Fetching data from {repoName} repository...</small>
         </div>
-      </motion.div>
+      </div>
     );
   };
 
@@ -285,13 +273,8 @@ const RepoDetails = () => {
 
   if (branchesError) {
     return (
-      <motion.div
-        className="container py-4 text-white"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        style={{ backgroundColor: '#1a1a2e', minHeight: '80vh' }}
-      >
-        <div className="text-center py-5">
+      <div className="container py-4 bg-dark" style={{ minHeight: '80vh' }}>
+        <div className="text-center py-5 text-white">
           <motion.div
             animate={{
               scale: [1, 1.2, 1],
@@ -313,19 +296,14 @@ const RepoDetails = () => {
             <i className="bi bi-arrow-clockwise me-2"></i>Retry
           </button>
         </div>
-      </motion.div>
+      </div>
     );
   }
 
   if (error || lastError) {
     return (
-      <motion.div
-        className="container py-4 text-white"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        style={{ backgroundColor: '#1a1a2e', minHeight: '80vh' }}
-      >
-        <div className="text-center py-5">
+      <div className="container py-4 bg-dark" style={{ minHeight: '80vh' }}>
+        <div className="text-center py-5 text-white">
           <motion.div
             animate={{
               scale: [1, 1.1, 1],
@@ -381,7 +359,7 @@ const RepoDetails = () => {
             )}
           </div>
         </div>
-      </motion.div>
+      </div>
     );
   }
 
@@ -398,7 +376,7 @@ const RepoDetails = () => {
 
   if (!project) {
     return (
-      <div className="container py-4 text-white" style={{ backgroundColor: '#1a1a2e' }}>
+      <div className="container py-4 bg-dark text-white">
         <Alert variant="warning">
           <h5>No Analysis Data Found</h5>
           <p>This repository hasn't been analyzed yet.</p>
@@ -411,12 +389,7 @@ const RepoDetails = () => {
   }
 
   return (
-    <motion.div
-      className="container py-4 text-white"
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      style={{ backgroundColor: '#1a1a2e' }}
-    >
+    <div className="container py-4 bg-dark text-white">
       <div className="d-flex justify-content-between align-items-center mb-4">
         <div>
           <h1 className="mb-1 d-flex align-items-center">
@@ -430,14 +403,9 @@ const RepoDetails = () => {
             )}
           </h1>
           {project?.description && (
-            <motion.p 
-              className="text-light mb-0"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.3 }}
-            >
+            <p className="text-light mb-0">
               {project.description}
-            </motion.p>
+            </p>
           )}
         </div>
         <div className="d-flex gap-2">
@@ -557,44 +525,69 @@ const RepoDetails = () => {
             </Card.Header>
             <Card.Body>
               {branchMetrics ? (
-                <div className="row g-2">
-                  <div className="col-6">
-                    <div className="text-center">
-                      <h6 className="text-muted">Lines</h6>
-                      <h4>{branchMetrics.linesOfCode?.toLocaleString() || '0'}</h4>
+                <div className="metrics-grid">
+                  <div className="metric-item bg-dark-800 p-3 rounded">
+                    <div className="metric-header d-flex justify-content-between align-items-center mb-2">
+                      <span className="metric-name text-light fw-bold">Lines of Code</span>
+                      <FaCode className="text-info" />
                     </div>
+                    <h3 className="metric-value text-white">{branchMetrics.linesOfCode?.toLocaleString() || '0'}</h3>
                   </div>
-                  <div className="col-6">
-                    <div className="text-center">
-                      <h6 className="text-muted">Files</h6>
-                      <h4>{branchMetrics.filesCount?.toLocaleString() || '0'}</h4>
+
+                  <div className="metric-item bg-dark-800 p-3 rounded">
+                    <div className="metric-header d-flex justify-content-between align-items-center mb-2">
+                      <span className="metric-name text-light fw-bold">Files</span>
+                      <BsFileCode className="text-primary" />
                     </div>
+                    <h3 className="metric-value text-white">{branchMetrics.filesCount?.toLocaleString() || '0'}</h3>
                   </div>
-                  <div className="col-12 mt-3">
-                    <h6 className="text-muted">Coverage</h6>
+
+                  <div className="metric-item bg-dark-800 p-3 rounded">
+                    <div className="metric-header d-flex justify-content-between align-items-center mb-2">
+                      <span className="metric-name text-light fw-bold">Coverage</span>
+                      <FaShieldAlt className="text-success" />
+                    </div>
+                    <h3 className="metric-value text-white mb-2">{branchMetrics.coverage?.toFixed(2) || 0}%</h3>
                     <ProgressBar 
                       now={branchMetrics.coverage || 0} 
-                      label={`${branchMetrics.coverage?.toFixed(2) || 0}%`} 
                       variant={
                         branchMetrics.coverage > 80 ? 'success' : 
                         branchMetrics.coverage > 50 ? 'warning' : 'danger'
-                      } 
+                      }
+                      className="progress-bar-striped"
                     />
                   </div>
-                  <div className="col-12 mt-3">
-                    <h6 className="text-muted">Duplicates</h6>
+
+                  <div className="metric-item bg-dark-800 p-3 rounded">
+                    <div className="metric-header d-flex justify-content-between align-items-center mb-2">
+                      <span className="metric-name text-light fw-bold">Duplicates</span>
+                      <FaExclamationTriangle className="text-warning" />
+                    </div>
+                    <h3 className="metric-value text-white mb-2">{branchMetrics.duplicatedLines?.toFixed(2) || 0}%</h3>
                     <ProgressBar 
                       now={branchMetrics.duplicatedLines || 0} 
-                      label={`${branchMetrics.duplicatedLines?.toFixed(2) || 0}%`} 
                       variant={
                         branchMetrics.duplicatedLines < 5 ? 'success' : 
                         branchMetrics.duplicatedLines < 15 ? 'warning' : 'danger'
-                      } 
+                      }
+                      className="progress-bar-striped"
                     />
                   </div>
-                  <div className="col-12 mt-3">
-                    <h6 className="text-muted">Complexity</h6>
-                    <h4>{branchMetrics.complexity?.toLocaleString() || '0'}</h4>
+
+                  <div className="metric-item bg-dark-800 p-3 rounded">
+                    <div className="metric-header d-flex justify-content-between align-items-center mb-2">
+                      <span className="metric-name text-light fw-bold">Complexity</span>
+                      <GiSpiderWeb className="text-danger" />
+                    </div>
+                    <h3 className="metric-value text-white">{branchMetrics.complexity?.toLocaleString() || '0'}</h3>
+                  </div>
+
+                  <div className="metric-item bg-dark-800 p-3 rounded">
+                    <div className="metric-header d-flex justify-content-between align-items-center mb-2">
+                      <span className="metric-name text-light fw-bold">Violations</span>
+                      <FaBug className="text-danger" />
+                    </div>
+                    <h3 className="metric-value text-white">{branchMetrics.violations?.toLocaleString() || '0'}</h3>
                   </div>
                 </div>
               ) : (
@@ -614,17 +607,17 @@ const RepoDetails = () => {
             </Card.Header>
             <Card.Body>
               <div className="mb-3">
-                <div className="d-flex justify-content-between mb-2 text-light">
-                  <span>Total:</span>
-                  <strong>{project?.estimatedLinesOfCode?.toLocaleString() || '0'}</strong>
+                <div className="d-flex justify-content-between mb-2">
+                  <span className="text-light">Total:</span>
+                  <strong className="text-white">{project?.estimatedLinesOfCode?.toLocaleString() || '0'}</strong>
                 </div>
-                <div className="d-flex justify-content-between mb-2 text-light">
-                  <span>SonarQube Lines:</span>
-                  <strong>{locReport?.sonarQubeLines?.toLocaleString() || '0'}</strong>
+                <div className="d-flex justify-content-between mb-2">
+                  <span className="text-light">SonarQube Lines:</span>
+                  <strong className="text-white">{locReport?.sonarQubeLines?.toLocaleString() || '0'}</strong>
                 </div>
-                <div className="d-flex justify-content-between mb-2 text-light">
-                  <span>Last Updated:</span>
-                  <strong>{locReport?.lastUpdated ? new Date(locReport.lastUpdated).toLocaleString() : 'N/A'}</strong>
+                <div className="d-flex justify-content-between mb-2">
+                  <span className="text-light">Last Updated:</span>
+                  <strong className="text-white">{locReport?.lastUpdated ? new Date(locReport.lastUpdated).toLocaleString() : 'N/A'}</strong>
                 </div>
               </div>
               
@@ -638,13 +631,14 @@ const RepoDetails = () => {
                       const percentage = (lines as number / total) * 100;
                       return (
                         <div key={lang} className="mb-2">
-                          <div className="d-flex justify-content-between mb-1 text-light">
-                            <span>{lang}</span>
-                            {/* <span>{lines.toLocaleString()} lines ({percentage.toFixed(1)}%)</span> */}
+                          <div className="d-flex justify-content-between mb-1">
+                            <span className="text-light">{lang}</span>
+                            <span className="text-white">{lines as number} ({percentage.toFixed(1)}%)</span>
                           </div>
                           <ProgressBar 
                             now={percentage} 
                             variant={getLanguageColor(lang)} 
+                            className="progress-bar-striped"
                             style={{ height: '8px' }} 
                           />
                         </div>
@@ -659,88 +653,125 @@ const RepoDetails = () => {
         </div>
 
         <div className="col-md-6">
-          <Card className="h-100 bg-dark border-secondary">
-            <Card.Header className="bg-primary text-white d-flex align-items-center">
-              <FaShieldAlt className="me-2" />
-              <h5 className="mb-0">Quality Gate</h5>
-            </Card.Header>
-            <Card.Body>
-              {branchMetrics ? (
-                <div className="text-center">
-                  <Badge 
-                    bg={branchMetrics.qualityGateStatus === 'OK' ? 'success' : 'danger'} 
-                    className="mb-3 fs-5 p-3"
-                  >
-                    {branchMetrics.qualityGateStatus || 'UNKNOWN'}
-                  </Badge>
-                  <div className="row mt-3">
-                    <div className="col-4">
-                      <div className="text-center">
-                        <h6 className="text-muted">Bugs</h6>
-                        <h4>{branchMetrics.bugs || 0}</h4>
-                      </div>
-                    </div>
-                    <div className="col-4">
-                      <div className="text-center">
-                        <h6 className="text-muted">Vulnerabilities</h6>
-                        <h4>{branchMetrics.vulnerabilities || 0}</h4>
-                      </div>
-                    </div>
-                    <div className="col-4">
-                      <div className="text-center">
-                        <h6 className="text-muted">Code Smells</h6>
-                        <h4>{branchMetrics.codeSmells || 0}</h4>
-                      </div>
-                    </div>
-                  </div>
-                  <div className="row mt-3">
-                    <div className="col-6">
-                      <div className="text-center">
-                        <h6 className="text-muted">Reliability Rating</h6>
-                        <h4>{branchMetrics.reliabilityRating || 0}/5</h4>
-                        <ProgressBar 
-                          now={(branchMetrics.reliabilityRating || 0) * 20} 
-                          variant={
-                            branchMetrics.reliabilityRating <= 2 ? 'success' : 
-                            branchMetrics.reliabilityRating <= 3 ? 'warning' : 'danger'
-                          }
-                        />
-                      </div>
-                    </div>
-                    <div className="col-6">
-                      <div className="text-center">
-                        <h6 className="text-muted">Security Rating</h6>
-                        <h4>{branchMetrics.securityRating || 0}/5</h4>
-                        <ProgressBar 
-                          now={(branchMetrics.securityRating || 0) * 20} 
-                          variant={
-                            branchMetrics.securityRating <= 2 ? 'success' : 
-                            branchMetrics.securityRating <= 3 ? 'warning' : 'danger'
-                          }
-                        />
-                      </div>
-                    </div>
-                  </div>
-                  <div className="mt-3">
-                    <h6 className="text-muted">Debt Ratio</h6>
-                    <h4>{branchMetrics.debtRatio?.toFixed(2) || 0}%</h4>
-                    <ProgressBar 
-                      now={branchMetrics.debtRatio || 0} 
-                      variant={
-                        branchMetrics.debtRatio < 5 ? 'success' : 
-                        branchMetrics.debtRatio < 10 ? 'warning' : 'danger'
-                      }
-                    />
-                  </div>
-                </div>
-              ) : (
-                <Alert variant="info">No quality gate data available</Alert>
-              )}
-            </Card.Body>
-          </Card>
+        <Card className="h-100 bg-dark border-secondary">
+          <Card.Header className="bg-primary text-white d-flex align-items-center">
+           <FaShieldAlt className="me-2" />
+              <h5 className="mb-0">Quality Gate Status</h5>
+                </Card.Header>
+                  <Card.Body>
+                     {branchMetrics ? (
+                     <div>
+                        <div className="text-center mb-4">
+                          <h4 className="text-light mb-3">Overall Quality</h4>
+                          <Badge bg={branchMetrics.qualityGateStatus === 'OK' ? 'success' : 'danger'} className="fs-4 p-3">
+                            {branchMetrics.qualityGateStatus || 'UNKNOWN'}
+                          </Badge>
+                        </div>
+                        <h5 className="text-light mb-3 border-bottom pb-2">Issue Summary</h5>
+                          <div className="row mb-4">
+                            <div className="col-4">
+                              <div className="text-center p-3 bg-dark-800 rounded">
+                                <h6 className="text-info">Bugs</h6>
+                                  <h3 className="text-white">{branchMetrics.bugs || 0}</h3>
+                              </div>
+                            </div>
+                          <div className="col-4">
+                            <div className="text-center p-3 bg-dark-800 rounded">
+                              <h6 className="text-danger">Vulnerabilities</h6>
+                                <h3 className="text-white">{branchMetrics.vulnerabilities || 0}</h3>
+                            </div>
+                          </div>
+                         <div className="col-4">
+                           <div className="text-center p-3 bg-dark-800 rounded">
+                              <h6 className="text-warning">Code Smells</h6>
+                              <h3 className="text-white">{branchMetrics.codeSmells || 0}</h3>
+                            </div>
+                          </div>
+                        </div>
+                        <h5 className="text-light mb-3 border-bottom pb-2">Ratings</h5>
+                        <div className="row mb-4">
+                        <div className="col-6">
+                            <div className="p-3 bg-dark-800 rounded h-100">
+                              <h6 className="text-info">Reliability Rating</h6>
+                                <div className="d-flex align-items-center mb-2">
+                                   <h3 className="text-white me-3 mb-0">{branchMetrics.reliabilityRating || 0}/5</h3>
+                                      <Badge bg={branchMetrics.reliabilityRating <= 2 ? 'success' : 
+                                       branchMetrics.reliabilityRating <= 3 ? 'warning' : 'danger'}>
+                                       {branchMetrics.reliabilityRating <= 2 ? 'Good' : 
+                                       branchMetrics.reliabilityRating <= 3 ? 'Fair' : 'Poor'}
+                                      </Badge>
+                                  </div>
+              <ProgressBar 
+                now={(branchMetrics.reliabilityRating || 0) * 20} 
+                variant={
+                  branchMetrics.reliabilityRating <= 2 ? 'success' : 
+                  branchMetrics.reliabilityRating <= 3 ? 'warning' : 'danger'
+                }
+                className="progress-bar-striped"
+              />
+            </div>
+          </div>
+          <div className="col-6">
+            <div className="p-3 bg-dark-800 rounded h-100">
+              <h6 className="text-info">Security Rating</h6>
+              <div className="d-flex align-items-center mb-2">
+                <h3 className="text-white me-3 mb-0">{branchMetrics.securityRating || 0}/5</h3>
+                <Badge bg={
+                  branchMetrics.securityRating <= 2 ? 'success' : 
+                  branchMetrics.securityRating <= 3 ? 'warning' : 'danger'
+                }>
+                  {branchMetrics.securityRating <= 2 ? 'Good' : 
+                   branchMetrics.securityRating <= 3 ? 'Fair' : 'Poor'}
+                </Badge>
+              </div>
+              <ProgressBar 
+                now={(branchMetrics.securityRating || 0) * 20} 
+                variant={
+                  branchMetrics.securityRating <= 2 ? 'success' : 
+                  branchMetrics.securityRating <= 3 ? 'warning' : 'danger'
+                }
+                className="progress-bar-striped"
+              />
+            </div>
+          </div>
+        </div>
+        <h5 className="text-light mb-3 border-bottom pb-2">Technical Debt</h5>
+        <div className="p-3 bg-dark-800 rounded">
+          <h6 className="text-warning">Debt Ratio</h6>
+          <div className="d-flex align-items-center mb-2">
+            <h3 className="text-white me-3 mb-0">{branchMetrics.debtRatio?.toFixed(2) || 0}%</h3>
+            <Badge bg={
+              branchMetrics.debtRatio < 5 ? 'success' : 
+              branchMetrics.debtRatio < 10 ? 'warning' : 'danger'
+            }>
+              {branchMetrics.debtRatio < 5 ? 'Low' : 
+               branchMetrics.debtRatio < 10 ? 'Medium' : 'High'}
+            </Badge>
+          </div>
+          <ProgressBar 
+            now={branchMetrics.debtRatio || 0} 
+            variant={
+              branchMetrics.debtRatio < 5 ? 'success' : 
+              branchMetrics.debtRatio < 10 ? 'warning' : 'danger'
+            }
+            className="progress-bar-striped"
+          />
+          <small className="text-muted mt-2 d-block">
+            {branchMetrics.debtRatio < 5 ? 'Minimal technical debt' : 
+             branchMetrics.debtRatio < 10 ? 'Moderate technical debt' : 'High technical debt'}
+          </small>
         </div>
       </div>
-
+      ) : (
+      <Alert variant="info" className="text-center">
+        <h5>No Quality Gate Data Available</h5>
+        <p className="mb-0">Run an analysis to see quality metrics</p>
+      </Alert>
+      )}
+      </Card.Body>
+      </Card>
+      </div>
+      </div>
       <Card className="mb-4 bg-dark border-secondary">
         <Card.Header className="bg-primary text-white d-flex justify-content-between align-items-center">
           <h5 className="mb-0 d-flex align-items-center">
@@ -751,47 +782,37 @@ const RepoDetails = () => {
         </Card.Header>
         <Card.Body className="p-0">
           {branchIssues.length > 0 ? (
-            <div className="list-group list-group-flush">
-              {branchIssues.map((issue: SonarIssue) => (
-                <div key={issue.u_id} className="list-group-item bg-dark text-light border-secondary">
-                  <div className="d-flex justify-content-between align-items-start">
-                    <div>
-                      <div className="d-flex align-items-center mb-1">
-                        <Badge bg={getSeverityVariant(issue.severity)} className="me-2">
-                          {issue.severity}
-                        </Badge>
-                        <span className="fw-bold">{issue.message}</span>
-                      </div>
-                      <div className="text-muted small">
-                        <span className="me-3">
-                          <i className="bi bi-file-earmark-code me-1"></i>
-                          {issue.component.split(":").pop()}
-                        </span>
-                        <span>
-                          <i className="bi bi-list-ol me-1"></i>
-                          Line {issue.line}
-                        </span>
-                        <span className="ms-3">
-                          <i className="bi bi-calendar me-1"></i>
-                          {new Date(issue.createdAt).toLocaleDateString()}
-                        </span>
-                        <span className="ms-3">
-                          <i className="bi bi-tag me-1"></i>
-                          {issue.type}
-                        </span>
-                        {issue.resolution && (
-                          <span className="ms-3">
-                            <i className="bi bi-check-circle me-1"></i>
-                            {issue.resolution}
-                          </span>
-                        )}
-                      </div>
-                    </div>
-                    <Badge bg="secondary" className="text-uppercase">{issue.rule}</Badge>
-                  </div>
-                </div>
-              ))}
-            </div>
+            <Table striped bordered hover variant="dark" className="mb-0">
+              <thead>
+                <tr>
+                  <th>Severity</th>
+                  <th>Message</th>
+                  <th>Location</th>
+                  <th>Type</th>
+                </tr>
+              </thead>
+              <tbody>
+                {branchIssues.map((issue: SonarIssue) => (
+                  <tr key={issue.u_id}>
+                    <td>
+                      <Badge bg={getSeverityVariant(issue.severity)}>
+                        {issue.severity}
+                      </Badge>
+                    </td>
+                    <td>
+                      <div className="fw-bold">{issue.message}</div>
+                      <small className="text-muted">{issue.rule}</small>
+                    </td>
+                    <td>
+                      {issue.component.split(":").pop()}:{issue.line}
+                    </td>
+                    <td>
+                      <Badge bg="secondary" className="text-uppercase">{issue.type}</Badge>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </Table>
           ) : (
             <div className="text-center py-5">
               <i className="bi bi-check-circle-fill text-success fs-1 mb-3"></i>
@@ -866,7 +887,7 @@ const RepoDetails = () => {
           </Table>
         </Card.Body>
       </Card>
-    </motion.div>
+    </div>
   );
 };
 
