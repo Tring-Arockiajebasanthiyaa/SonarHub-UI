@@ -1,17 +1,49 @@
-import React from "react";
+import React ,{useState,useEffect}from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { useQuery } from "@apollo/client";
-import { GET_REPO_BRANCHES } from "../Graphql/Queries";
+import { useQuery,gql } from "@apollo/client";
+import { GET_BRANCHES_BY_USERNAME_AND_REPO } from "../Graphql/Queries";
 import { Card, Badge, Spinner, Alert, Button } from "react-bootstrap";
 import { motion } from "framer-motion";
 import { FaGithub, FaCodeBranch, FaArrowLeft} from "react-icons/fa";
 import { FaCodePullRequest } from "react-icons/fa6";
+import { useAuth } from "../../Context/AuthContext";
+const GET_USER = gql`
+  query GetUserByEmail($email: String!) {
+    getUserByEmail(email: $email) {
+      username
+    }
+  }
+`;
 const RepositoryBranches = () => {
   const { repoName } = useParams();
   const navigate = useNavigate();
-  const { data, loading, error } = useQuery(GET_REPO_BRANCHES, {
-    variables: { repoName },
+  const { userEmail } = useAuth();
+  const [githubUsername, setGithubUsername] = useState<string | null>(null);
+
+  const { data: userData, loading: userLoading, error: userError } = useQuery(GET_USER, {
+    variables: { email: userEmail },
+    skip: !userEmail,
   });
+
+  useEffect(() => {
+    if (userData?.getUserByEmail?.username) {
+      setGithubUsername(userData.getUserByEmail.username);
+    }
+  }, [userData]);
+
+  const {
+    data,
+    loading,
+    error
+  } = useQuery(GET_BRANCHES_BY_USERNAME_AND_REPO, {
+    variables: {
+      githubUsername: githubUsername!,
+      repoName: repoName!,
+    },
+    skip: !githubUsername || !repoName,
+  });
+
+
 
   if (loading) {
     return (
@@ -35,7 +67,7 @@ const RepositoryBranches = () => {
         <Button 
           variant="outline-light" 
           className="me-3" 
-          onClick={() => navigate("/dashboard/repositories")}
+          onClick={() => navigate("/dashboard/pull-requests")}
         >
           <FaArrowLeft className="me-1" />
           Back to Repositories
@@ -51,9 +83,11 @@ const RepositoryBranches = () => {
       </div>
 
       <div className="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
-        {data?.getRepoBranches?.map((branch: any) => (
+        {data?.getBranchesByUsernameAndRepo?.map((branch: any) => (
+
           <motion.div
-            key={branch.name}
+          key={`${branch.repoName}-${branch.username}-${branch.name}`}
+
             className="col"
             whileHover={{ scale: 1.03 }}
             transition={{ duration: 0.2 }}
@@ -76,7 +110,7 @@ const RepositoryBranches = () => {
                   <Button 
                     variant="outline-light" 
                     size="sm"
-                    onClick={() => navigate(`/dashboard/repo/${repoName}/branch/${branch.name}/pulls`)}
+                    onClick={() => navigate(`/dashboard/pull-requests/${repoName}/branches/${branch.name}/pulls`)}
                   >
                     <FaCodePullRequest className="me-1" />
                     View Pull Requests
@@ -88,7 +122,7 @@ const RepositoryBranches = () => {
         ))}
       </div>
 
-      {data?.getRepoBranches?.length === 0 && (
+      {data?.getBranchesByUsernameAndRepo?.length === 0 && (
         <Alert variant="info" className="text-center">
           No branches found for this repository
         </Alert>

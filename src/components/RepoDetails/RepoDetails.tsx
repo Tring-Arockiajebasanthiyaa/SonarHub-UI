@@ -5,8 +5,8 @@ import { useEffect, useState } from "react";
 import { GET_USER, GET_PROJECT_ANALYSIS, GET_REPO_BRANCHES } from "../Graphql/Queries";
 import { motion } from "framer-motion";
 import { TRIGGER_AUTOMATIC_ANALYSIS, ANALYZE_SINGLE_REPOSITORY } from "../Graphql/Mutations";
-import { Badge, ProgressBar, Spinner, Alert, Card, ListGroup, Dropdown, Tab, Tabs, Table } from "react-bootstrap";
-import { FaGithub, FaCode, FaBug, FaShieldAlt, FaExclamationTriangle, FaClock, FaChartLine, FaLanguage, FaCodeBranch } from "react-icons/fa";
+import { Badge, ProgressBar, Spinner, Alert, Card, ListGroup, Dropdown, Table } from "react-bootstrap";
+import { FaGithub, FaCode, FaBug, FaShieldAlt, FaExclamationTriangle,FaChartLine, FaCodeBranch } from "react-icons/fa";
 import { GiSpiderWeb } from "react-icons/gi";
 import { RiGitRepositoryLine } from "react-icons/ri";
 import { BsGraphUp, BsFileCode } from "react-icons/bs";
@@ -447,7 +447,7 @@ const RepoDetails = () => {
             <Card.Body>
               <ListGroup variant="flush" className="bg-transparent">
                 <ListGroup.Item className="bg-transparent text-light border-secondary">
-                  <strong>Title:</strong> {project?.title || 'N/A'}
+                  <strong>Title:</strong> {project?.title || '-'}
                 </ListGroup.Item>
                 <ListGroup.Item className="bg-transparent text-light border-secondary">
                   <strong>Description:</strong> {project?.description || 'None'}
@@ -455,7 +455,7 @@ const RepoDetails = () => {
                 <ListGroup.Item className="bg-transparent text-light border-secondary">
                   <strong>URL:</strong>{' '}
                   <a href={project?.githubUrl} target="_blank" rel="noopener noreferrer" className="text-info">
-                    {project?.githubUrl || 'N/A'}
+                    {project?.githubUrl || '-'}
                   </a>
                 </ListGroup.Item>
                 <ListGroup.Item className="bg-transparent text-light border-secondary">
@@ -465,10 +465,10 @@ const RepoDetails = () => {
                   </Badge>
                 </ListGroup.Item>
                 <ListGroup.Item className="bg-transparent text-light border-secondary">
-                  <strong>Owner:</strong> {project?.user?.name || 'N/A'}
+                  <strong>Owner:</strong> {project?.user?.name || '-'}
                 </ListGroup.Item>
                 <ListGroup.Item className="bg-transparent text-light border-secondary">
-                  <strong>Email:</strong> {project?.user?.email || 'N/A'}
+                  <strong>Email:</strong> {project?.user?.email || '-'}
                 </ListGroup.Item>
               </ListGroup>
             </Card.Body>
@@ -484,7 +484,7 @@ const RepoDetails = () => {
             <Card.Body>
               <ListGroup variant="flush" className="bg-transparent">
                 <ListGroup.Item className="bg-transparent text-light border-secondary">
-                  <strong>Current Branch:</strong> {selectedBranch || 'N/A'}
+                  <strong>Current Branch:</strong> {selectedBranch || '-'}
                 </ListGroup.Item>
                 <ListGroup.Item className="bg-transparent text-light border-secondary">
                   <strong>Default Branch:</strong> {project?.defaultBranch || 'master'}
@@ -495,7 +495,7 @@ const RepoDetails = () => {
                     <a href={currentBranch.dashboardUrl} target="_blank" rel="noopener noreferrer" className="text-info">
                       View Dashboard
                     </a>
-                  ) : 'N/A'}
+                  ) : '-'}
                 </ListGroup.Item>
                 <ListGroup.Item className="bg-transparent text-light border-secondary">
                   <strong>Last Analyzed:</strong>{' '}
@@ -617,7 +617,7 @@ const RepoDetails = () => {
                 </div>
                 <div className="d-flex justify-content-between mb-2">
                   <span className="text-light">Last Updated:</span>
-                  <strong className="text-white">{locReport?.lastUpdated ? new Date(locReport.lastUpdated).toLocaleString() : 'N/A'}</strong>
+                  <strong className="text-white">{locReport?.lastUpdated ? new Date(locReport.lastUpdated).toLocaleString() : '-'}</strong>
                 </div>
               </div>
               
@@ -860,14 +860,14 @@ const RepoDetails = () => {
                         <Badge bg={metrics.qualityGateStatus === 'OK' ? 'success' : 'danger'}>
                           {metrics.qualityGateStatus || 'UNKNOWN'}
                         </Badge>
-                      ) : 'N/A'}
+                      ) : '-'}
                     </td>
                     <td>
                       {branch.dashboardUrl ? (
                         <a href={branch.dashboardUrl} target="_blank" rel="noopener noreferrer" className="text-info">
                           View Dashboard
                         </a>
-                      ) : 'N/A'}
+                      ) : '-'}
                     </td>
                     <td>
                       {metrics ? (

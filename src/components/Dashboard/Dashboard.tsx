@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
-import { useQuery, useLazyQuery } from "@apollo/client";
+import { useQuery, useLazyQuery, useMutation } from "@apollo/client";
 import { GET_USER_ACTIVITY, GET_USER } from "../Graphql/Queries";
 import { useAuth } from "../../Context/AuthContext";
 import moment from "moment";
@@ -20,9 +20,12 @@ import {
   faCalendarAlt,
   faExclamationTriangle,
 } from "@fortawesome/free-solid-svg-icons";
+import { FaGithub} from "react-icons/fa";
 import { ClipLoader } from "react-spinners";
 import { motion } from "framer-motion";
 import "./Dashboard.css";
+import { REQUEST_GITHUB_AUTH } from "../Graphql/Mutations";
+import { Button } from "react-bootstrap";
 
 const Dashboard: React.FC = () => {
   const navigate = useNavigate();
@@ -53,7 +56,25 @@ const Dashboard: React.FC = () => {
   }, [githubUsername, fetchUserActivity]);
 
   const useActivity = useMemo(() => data?.getUserActivity || {}, [data]);
-
+  const [requestGithubAuth] = useMutation(REQUEST_GITHUB_AUTH);
+    const handleGithubLogin = async () => {
+      try {
+        const { data: authUrlResult } = await requestGithubAuth({
+          variables: { username: githubUsername },
+        });
+    
+        const redirectUrl = authUrlResult?.requestGithubAuth?.url;
+        if (redirectUrl) {
+          window.location.href = redirectUrl;
+        } else {
+          const message = authUrlResult?.requestGithubAuth?.message || "GitHub auth failed.";
+          alert(message);
+        }
+      } catch (err) {
+        console.error("GitHub Auth Error:", err);
+        alert("GitHub auth failed.");
+      }
+    };
   console.log(useActivity);
   console.log(JSON.stringify(useActivity, null, 2));
 
@@ -82,8 +103,14 @@ const Dashboard: React.FC = () => {
     <div className="dashboard-container">
       <header className="header">
         <h4 className="header-title text-center">🚀 Developer Performance Dashboard</h4>
+        <div className="text-center">
+          <Button variant="dark" className="me-5 mt-3" onClick={handleGithubLogin}>
+             <FaGithub className="me-1" />
+               Connect GitHub
+          </Button>
+        </div>
       </header>
-
+      
       {loading ? (
         <div className="spinner-container">
           <ClipLoader color="#58a6ff" size={80} />

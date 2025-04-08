@@ -1,12 +1,14 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { useQuery, useLazyQuery, gql } from "@apollo/client";
+import { useQuery, useLazyQuery, gql ,useMutation} from "@apollo/client";
 import { Badge, Spinner, Alert, Button, Table } from "react-bootstrap";
+
 import { motion } from "framer-motion";
 import { FaGithub, FaArrowLeft } from "react-icons/fa";
 import { FaCodePullRequest } from "react-icons/fa6";
 import { useAuth } from "../../Context/AuthContext";
-
+import { GET_PULL_REQUESTS_BY_BRANCH } from "../Graphql/Queries";
+import { TRIGGER_ANALYSIS,REQUEST_GITHUB_AUTH } from "../Graphql/Mutations";
 const GET_USER = gql`
   query GetUserByEmail($email: String!) {
     getUserByEmail(email: $email) {
@@ -15,28 +17,7 @@ const GET_USER = gql`
   }
 `;
 
-const GET_PULL_REQUESTS_BY_BRANCH = gql`
-  query GetPullRequestsByBranch(
-    $branchName: String!
-    $repoName: String!
-    $githubUsername: String!
-  ) {
-    getPullRequestsByBranch(
-      branchName: $branchName
-      repoName: $repoName
-      githubUsername: $githubUsername
-    ) {
-      pr_id
-      title
-      state
-      author
-      createdAt
-      additions
-      deletions
-      changedFiles
-    }
-  }
-`;
+
 
 const BranchPullRequests = () => {
   const { repoName, branchName } = useParams<{
@@ -46,8 +27,52 @@ const BranchPullRequests = () => {
   const navigate = useNavigate();
   const { userEmail } = useAuth();
   const [githubUsername, setGithubUsername] = useState<string>("");
+  const [triggerAnalysis] = useMutation(TRIGGER_ANALYSIS);
 
-  // 1. First fetch the user data to get the GitHub username
+  const handleTriggerAnalysis = async () => {
+    const firstPR = data?.getPullRequestsByBranch?.[0];
+    if (!firstPR) return;
+  
+    try {
+      const { data: result } = await triggerAnalysis({
+        variables: {
+          username: githubUsername,
+          repoName,
+          branchName,
+          prId: firstPR.prId,
+        },
+      });
+  
+      if (result?.triggerAnalysis?.success) {
+        alert("Analysis triggered and comment posted!");
+      } else {
+        alert(`Something went wrong: ${result?.triggerAnalysis?.message}`);
+      }
+    } catch (err: any) {
+      console.error("GraphQL error:", err);
+      alert("Error triggering analysis.");
+    }
+  };
+  const [requestGithubAuth] = useMutation(REQUEST_GITHUB_AUTH);
+  const handleGithubLogin = async () => {
+    try {
+      const { data: authUrlResult } = await requestGithubAuth({
+        variables: { username: githubUsername },
+      });
+  
+      const redirectUrl = authUrlResult?.requestGithubAuth?.url;
+      if (redirectUrl) {
+        window.location.href = redirectUrl;
+      } else {
+        const message = authUrlResult?.requestGithubAuth?.message || "GitHub auth failed.";
+        alert(message);
+      }
+    } catch (err) {
+      console.error("GitHub Auth Error:", err);
+      alert("GitHub auth failed.");
+    }
+  };
+  
   const {
     loading: userLoading,
     error: userError,
@@ -61,18 +86,21 @@ const BranchPullRequests = () => {
       }
     },
   });
-
-  // 2. Then fetch pull requests only after we have the username
-  const [getPullRequests, { data, loading, error }] = useLazyQuery(
+  const [getPullRequestsByBranch, { data, loading, error }] = useLazyQuery(
     GET_PULL_REQUESTS_BY_BRANCH,
     {
       fetchPolicy: "network-only",
     }
   );
-
+  useEffect(() => {
+    console.log("repoName:", repoName);
+    console.log("branchName:", branchName);
+    console.log("githubUsername:", githubUsername);
+  }, [repoName, branchName, githubUsername]);
+  
   useEffect(() => {
     if (githubUsername && repoName && branchName) {
-      getPullRequests({
+      getPullRequestsByBranch({
         variables: {
           repoName,
           branchName,
@@ -117,6 +145,7 @@ const BranchPullRequests = () => {
   }
 
   return (
+    
     <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
@@ -127,11 +156,25 @@ const BranchPullRequests = () => {
         <Button
           variant="outline-light"
           className="me-3"
-          onClick={() => navigate(`/dashboard/repo/${repoName}/branches`)}
+          onClick={() => navigate(`/dashboard/pull-requests/${repoName}/branches`)}
         >
           <FaArrowLeft className="me-1" />
           Back to Branches
         </Button>
+        <Button variant="dark" className="me-3" onClick={handleGithubLogin}>
+  <FaGithub className="me-1" />
+  Connect GitHub
+</Button>
+              
+        <Button
+          variant="primary"
+          className="ms-auto"
+          onClick={handleTriggerAnalysis}
+          disabled={!data?.getPullRequestsByBranch?.length}
+          >
+          Trigger SonarQube Analysis
+          </Button>
+
         <h2 className="mb-0">
           <FaGithub className="me-2" />
           {repoName} / {branchName}
@@ -150,6 +193,7 @@ const BranchPullRequests = () => {
               <th>State</th>
               <th>Author</th>
               <th>Created</th>
+              <th>Closed </th>
               <th>Changes</th>
             </tr>
           </thead>
@@ -163,7 +207,8 @@ const BranchPullRequests = () => {
                   </Badge>
                 </td>
                 <td>{pr.author}</td>
-                <td>{new Date(pr.createdAt).toLocaleDateString()}</td>
+                <td>{new Date(pr.createdAt).toLocaleDateString("en-GB")}</td>
+                <td>{pr.closedAt ? new Date(pr.closedAt).toLocaleDateString("en-GB") : "Not Closed"}</td>
                 <td>
                   +{pr.additions} -{pr.deletions} ({pr.changedFiles} files)
                 </td>

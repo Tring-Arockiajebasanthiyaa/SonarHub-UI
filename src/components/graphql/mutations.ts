@@ -45,3 +45,23 @@ export const ANALYZE_SINGLE_REPOSITORY = gql`
   }
 }
 `;
+
+
+export const TRIGGER_ANALYSIS = gql`
+  mutation TriggerAnalysis($username: String!, $repoName: String!, $branchName: String!, $prId: Int!) {
+    triggerAnalysis(username: $username, repoName: $repoName, branchName: $branchName, prId: $prId) {
+      success
+      message
+    }
+  }
+`;
+
+export const REQUEST_GITHUB_AUTH = gql`
+  mutation RequestGithubAuth($username: String!, $code: String) {
+    requestGithubAuth(username: $username, code: $code) {
+      success
+      message
+      url
+    }
+  }
+`;

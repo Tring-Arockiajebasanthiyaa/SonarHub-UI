@@ -33,7 +33,6 @@ const GITHUB_AUTH = gql`
 export default function SignUp() {
   const navigate = useNavigate();
   const [isGitHubLoading, setIsGitHubLoading] = useState(false);
-
   const { data, loading, error } = useQuery(CHECK_AUTH, {
     fetchPolicy: "network-only",
   });
@@ -50,7 +49,6 @@ export default function SignUp() {
       }, 100);  
     }
   }, [data?.checkAuth?.isAuthenticated, navigate]);
-  
 
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
@@ -77,7 +75,8 @@ export default function SignUp() {
   const handleGitHubSignup = () => {
     const clientId = import.meta.env.VITE_CLIENT_ID;
     const redirectUri = import.meta.env.VITE_BACKEND_AUTH_URL || " ";
-    const githubAuthUrl = `https://github.com/login/oauth/authorize?client_id=${clientId}&redirect_uri=${encodeURIComponent(redirectUri)}&scope=user:email`;
+    const githubBaseUrl = import.meta.env.VITE_GITHUB_URL;
+    const githubAuthUrl = `${githubBaseUrl}/login/oauth/authorize?client_id=${clientId}&redirect_uri=${encodeURIComponent(redirectUri)}&scope=user:email`;
     window.location.href = githubAuthUrl;
   };
 
