@@ -103,6 +103,7 @@ const BranchPullRequests = () => {
     error: commentsError 
   }] = useLazyQuery(GET_PR_COMMENTS, {
     fetchPolicy: "network-only",
+    pollInterval: 3000
   });
 
   useEffect(() => {
