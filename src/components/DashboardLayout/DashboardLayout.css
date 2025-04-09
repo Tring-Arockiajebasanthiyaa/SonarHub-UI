@@ -9,7 +9,7 @@
   width: 250px;
   top: 0px;
   background-color: #1e1e1e;
-  padding-top: 1rem; /* Reduced from 2rem to 1rem */
+  padding-top: 1rem; 
   padding-bottom: 2rem;
   display: flex;
   flex-direction: column;
@@ -186,3 +186,4 @@
     transform: scale(1);
   }
 }
+

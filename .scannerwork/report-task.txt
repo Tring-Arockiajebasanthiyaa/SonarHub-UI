@@ -2,5 +2,5 @@ projectKey=frontend-app
 serverUrl=http://quality.tringbytes.com
 serverVersion=9.9.8.100196
 dashboardUrl=http://quality.tringbytes.com/dashboard?id=frontend-app
-ceTaskId=AZYP39gECe_vaTPJO5q-
-ceTaskUrl=http://quality.tringbytes.com/api/ce/task?id=AZYP39gECe_vaTPJO5q-
+ceTaskId=AZYZe3c5WoF2y7eJ-eAE
+ceTaskUrl=http://quality.tringbytes.com/api/ce/task?id=AZYZe3c5WoF2y7eJ-eAE

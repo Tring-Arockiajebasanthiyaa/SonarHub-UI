@@ -237,3 +237,14 @@ export const GET_PULL_REQUESTS_BY_BRANCH = gql`
     }
   }
 `;
+
+export const GET_PR_COMMENTS = gql`
+  query GetPRComments($username: String!, $repoName: String!, $prId: Int!) {
+    getPRComments(username: $username, repoName: $repoName, prId: $prId) {
+      id
+      body
+      userLogin
+      createdAt
+    }
+  }
+`;

@@ -49,6 +49,7 @@ const SonarRepo = () => {
       transition={{ duration: 0.5 }}
     >
       <h1 className="sonar-repo-title">SonarHub Repositories</h1>
+      
       <motion.table
         className="sonar-repo-table"
         initial={{ y: 20, opacity: 0 }}

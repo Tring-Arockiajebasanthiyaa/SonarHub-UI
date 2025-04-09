@@ -41,6 +41,7 @@ const RepositoryBranches = () => {
       repoName: repoName!,
     },
     skip: !githubUsername || !repoName,
+    fetchPolicy: "network-only",
   });
 
 

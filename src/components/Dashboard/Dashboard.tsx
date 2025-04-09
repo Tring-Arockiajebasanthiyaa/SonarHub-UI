@@ -88,7 +88,7 @@ const Dashboard: React.FC = () => {
       { title: "Public Repos", data: useActivity.publicRepoCount || 0, icon: faGlobe, color: "#20b2aa" },
       { title: "Private Repos", data: useActivity.privateRepoCount || 0, icon: faLock, color: "#9370db" },
       { title: "Languages Used", data: useActivity.languagesUsed?.join(", ") || "-", icon: faLanguage, color: "#ff8c00" },
-      { title: "Most Active Repo", data: useActivity.topContributedRepo || "-", icon: faFire, color: "#ff4500" },
+      { title: "Recently Created Repo", data: useActivity.topContributedRepo || "-", icon: faFire, color: "#ff4500" },
       { title: "Earliest Repo Created", data: moment(useActivity.earliestRepoCreatedAt).format("DD-MM-YYYY") || "-", icon: faCalendarAlt, color: "#8a2be2" },
       { title: "Most Recently Updated Repo", data: moment(useActivity.mostRecentlyUpdatedRepo).format("DD-MM-YYYY") || "-", icon: faClock, color: "#6495ed" },
       { title: "Last Active", data: moment(useActivity.lastActive).format("DD-MM-YYYY") || "-", icon: faClock, color: "#6495ed" },

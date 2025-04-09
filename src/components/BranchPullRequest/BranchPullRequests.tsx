@@ -1,14 +1,14 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react"; 
 import { useParams, useNavigate } from "react-router-dom";
-import { useQuery, useLazyQuery, gql ,useMutation} from "@apollo/client";
+import { useQuery, useLazyQuery, gql, useMutation } from "@apollo/client";
 import { Badge, Spinner, Alert, Button, Table } from "react-bootstrap";
-
 import { motion } from "framer-motion";
 import { FaGithub, FaArrowLeft } from "react-icons/fa";
 import { FaCodePullRequest } from "react-icons/fa6";
 import { useAuth } from "../../Context/AuthContext";
-import { GET_PULL_REQUESTS_BY_BRANCH } from "../Graphql/Queries";
-import { TRIGGER_ANALYSIS,REQUEST_GITHUB_AUTH } from "../Graphql/Mutations";
+import { GET_PULL_REQUESTS_BY_BRANCH, GET_PR_COMMENTS } from "../Graphql/Queries";
+import { TRIGGER_ANALYSIS, REQUEST_GITHUB_AUTH } from "../Graphql/Mutations";
+
 const GET_USER = gql`
   query GetUserByEmail($email: String!) {
     getUserByEmail(email: $email) {
@@ -16,8 +16,6 @@ const GET_USER = gql`
     }
   }
 `;
-
-
 
 const BranchPullRequests = () => {
   const { repoName, branchName } = useParams<{
@@ -27,12 +25,14 @@ const BranchPullRequests = () => {
   const navigate = useNavigate();
   const { userEmail } = useAuth();
   const [githubUsername, setGithubUsername] = useState<string>("");
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [triggerAnalysis] = useMutation(TRIGGER_ANALYSIS);
 
   const handleTriggerAnalysis = async () => {
     const firstPR = data?.getPullRequestsByBranch?.[0];
     if (!firstPR) return;
   
+    setIsAnalyzing(true); 
     try {
       const { data: result } = await triggerAnalysis({
         variables: {
@@ -51,8 +51,11 @@ const BranchPullRequests = () => {
     } catch (err: any) {
       console.error("GraphQL error:", err);
       alert("Error triggering analysis.");
+    } finally {
+      setIsAnalyzing(false);
     }
   };
+  
   const [requestGithubAuth] = useMutation(REQUEST_GITHUB_AUTH);
   const handleGithubLogin = async () => {
     try {
@@ -86,18 +89,22 @@ const BranchPullRequests = () => {
       }
     },
   });
+
   const [getPullRequestsByBranch, { data, loading, error }] = useLazyQuery(
     GET_PULL_REQUESTS_BY_BRANCH,
     {
       fetchPolicy: "network-only",
     }
   );
-  useEffect(() => {
-    console.log("repoName:", repoName);
-    console.log("branchName:", branchName);
-    console.log("githubUsername:", githubUsername);
-  }, [repoName, branchName, githubUsername]);
-  
+
+  const [getPRComments, { 
+    data: commentsData, 
+    loading: commentsLoading, 
+    error: commentsError 
+  }] = useLazyQuery(GET_PR_COMMENTS, {
+    fetchPolicy: "network-only",
+  });
+
   useEffect(() => {
     if (githubUsername && repoName && branchName) {
       getPullRequestsByBranch({
@@ -109,6 +116,19 @@ const BranchPullRequests = () => {
       });
     }
   }, [githubUsername, repoName, branchName]);
+
+  useEffect(() => {
+    if (githubUsername && repoName && data?.getPullRequestsByBranch?.[0]) {
+      const prId = data.getPullRequestsByBranch[0].prId;
+      getPRComments({
+        variables: {
+          username: githubUsername,
+          repoName,
+          prId,
+        },
+      });
+    }
+  }, [githubUsername, repoName, data]);
 
   if (userLoading) {
     return (
@@ -145,7 +165,6 @@ const BranchPullRequests = () => {
   }
 
   return (
-    
     <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
@@ -162,18 +181,32 @@ const BranchPullRequests = () => {
           Back to Branches
         </Button>
         <Button variant="dark" className="me-3" onClick={handleGithubLogin}>
-  <FaGithub className="me-1" />
-  Connect GitHub
-</Button>
+          <FaGithub className="me-1" />
+          Connect GitHub
+        </Button>
               
         <Button
-          variant="primary"
-          className="ms-auto"
+          variant="dark"
+          className="ms-auto w-3"
           onClick={handleTriggerAnalysis}
-          disabled={!data?.getPullRequestsByBranch?.length}
-          >
-          Trigger SonarQube Analysis
-          </Button>
+          disabled={!data?.getPullRequestsByBranch?.length || isAnalyzing}
+        >
+          {isAnalyzing ? (
+            <>
+              <Spinner
+                as="span"
+                animation="border"
+                size="sm"
+                role="status"
+                aria-hidden="true"
+                className="me-2"
+              />
+              Analyzing...
+            </>
+          ) : (
+            "Trigger SonarQube Analysis"
+          )}
+        </Button>
 
         <h2 className="mb-0">
           <FaGithub className="me-2" />
@@ -186,36 +219,60 @@ const BranchPullRequests = () => {
       </div>
 
       {data?.getPullRequestsByBranch?.length > 0 ? (
-        <Table striped bordered hover>
-          <thead>
-            <tr>
-              <th>Title</th>
-              <th>State</th>
-              <th>Author</th>
-              <th>Created</th>
-              <th>Closed </th>
-              <th>Changes</th>
-            </tr>
-          </thead>
-          <tbody>
-            {data.getPullRequestsByBranch.map((pr: any) => (
-              <tr key={pr.pr_id}>
-                <td>{pr.title}</td>
-                <td>
-                  <Badge bg={pr.state === "OPEN" ? "success" : "secondary"}>
-                    {pr.state}
-                  </Badge>
-                </td>
-                <td>{pr.author}</td>
-                <td>{new Date(pr.createdAt).toLocaleDateString("en-GB")}</td>
-                <td>{pr.closedAt ? new Date(pr.closedAt).toLocaleDateString("en-GB") : "Not Closed"}</td>
-                <td>
-                  +{pr.additions} -{pr.deletions} ({pr.changedFiles} files)
-                </td>
+        <>
+          <Table striped bordered hover>
+            <thead>
+              <tr>
+                <th>Title</th>
+                <th>State</th>
+                <th>Author</th>
+                <th>Created</th>
+                <th>Closed</th>
+                <th>Changes</th>
               </tr>
-            ))}
-          </tbody>
-        </Table>
+            </thead>
+            <tbody>
+              {data.getPullRequestsByBranch.map((pr: any) => (
+                <tr key={pr.pr_id}>
+                  <td>{pr.title}</td>
+                  <td>
+                    <Badge bg={pr.state === "OPEN" ? "success" : "secondary"}>
+                      {pr.state}
+                    </Badge>
+                  </td>
+                  <td>{pr.author}</td>
+                  <td>{new Date(pr.createdAt).toLocaleDateString("en-GB")}</td>
+                  <td>{pr.closedAt ? new Date(pr.closedAt).toLocaleDateString("en-GB") : "Not Closed"}</td>
+                  <td>
+                    +{pr.additions} -{pr.deletions} ({pr.changedFiles} files)
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </Table>
+
+          <h4 className="mt-5">PR Comments</h4>
+          {commentsLoading ? (
+            <div className="text-center py-3">
+              <Spinner animation="border" variant="secondary" />
+              <p>Loading comments...</p>
+            </div>
+          ) : commentsError ? (
+            <Alert variant="danger">Failed to load comments: {commentsError.message}</Alert>
+          ) : commentsData?.getPRComments?.length > 0 ? (
+            <ul className="list-group">
+              {commentsData.getPRComments.map((comment: any) => (
+                <li key={comment.id} className="list-group-item">
+                  <strong>{comment.userLogin}</strong> •{" "}
+                  {new Date(comment.createdAt).toLocaleString()}
+                  <p className="mb-0">{comment.body}</p>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <Alert variant="info">No comments found for this PR.</Alert>
+          )}
+        </>
       ) : (
         <Alert variant="info">No pull requests found for this branch.</Alert>
       )}

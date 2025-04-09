@@ -65,3 +65,9 @@ export const REQUEST_GITHUB_AUTH = gql`
     }
   }
 `;
+
+export const TRIGGER_BRANCH_ANALYSIS=gql`
+   mutation TriggerBranchAnalysis($githubUsername:string!,$repoName:string,$branchName:string){
+     triggerBranchAnalysis(githubUsername: $githubUsername, repoName: $repoName,branch:$branchName)
+   }
+`
