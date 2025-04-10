@@ -119,6 +119,7 @@ const RepoDetails = () => {
     },
     skip: !githubUsername || !cleanRepoName || !selectedBranch,
     fetchPolicy: 'network-only',
+    // pollInterval:5000,
     notifyOnNetworkStatusChange: true,
     onError: (err) => {
       setLastError(err.message);
@@ -592,10 +593,15 @@ const RepoDetails = () => {
                 </ListGroup.Item>
                 <ListGroup.Item className="bg-transparent text-light border-secondary">
                   <strong>Result:</strong>{' '}
-                  <Badge bg={project?.result === "Analysis completed" ? "success" : "danger"}>
-                    {project?.result || "Not analyzed"}
-                  </Badge>
+                    {analysisStatus ? (
+                      <Alert variant={
+                          analysisStatus.toLowerCase().includes('success') ? 'success' :
+                          analysisStatus.toLowerCase().includes('fail') ? 'danger' :
+                          analysisStatus.toLowerCase().includes('warning') ? 'warning' :
+                          'info'
+                        } className="mb-0">{analysisStatus}</Alert>) : (<span className="text-muted">Pending analysis...</span>)}
                 </ListGroup.Item>
+
               </ListGroup>
             </Card.Body>
           </Card>
@@ -753,15 +759,15 @@ const RepoDetails = () => {
                   </div>
                   <h5 className="text-light mb-3 border-bottom pb-2">Issue Summary</h5>
                   <div className="row mb-4">
-                    <div className="col-4">
+                    <div className="col-3">
                       <div className="text-center p-3 bg-dark-800 rounded">
                         <h6 className="text-info">Bugs</h6>
                         <h3 className="text-white">{branchMetrics.bugs || 0}</h3>
                       </div>
                     </div>
-                    <div className="col-4">
-                      <div className="text-center p-3 bg-dark-800 rounded w-20">
-                        <h6 className="text-danger">Vulnerabilities</h6>
+                    <div className="col-5">
+                      <div className="text-center p-3 bg-dark-800 rounded ">
+                        <h6 className="text-danger whitespace-nowrap">Vulnerabilities</h6>
                         <h3 className="text-white">{branchMetrics.vulnerabilities || 0}</h3>
                       </div>
                     </div>
@@ -863,7 +869,7 @@ const RepoDetails = () => {
             <FaExclamationTriangle className="me-2" />
             Issues ({branchIssues.length})
           </h5>
-          {project?.result === "Analysis failed" && <Badge bg="danger">Analysis Failed</Badge>}
+          
         </Card.Header>
         <Card.Body className="p-0">
           {branchIssues.length > 0 ? (
