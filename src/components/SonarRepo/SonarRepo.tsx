@@ -49,6 +49,7 @@ const SonarRepo = () => {
       transition={{ duration: 0.5 }}
     >
       <h1 className="sonar-repo-title">SonarHub Repositories</h1>
+      
       <motion.table
         className="sonar-repo-table"
         initial={{ y: 20, opacity: 0 }}
@@ -75,7 +76,7 @@ const SonarRepo = () => {
               transition={{ duration: 0.2 }}
             >
               <td>{repo.name}</td>
-              <td>{repo.owner?.username || "Unknown"}</td>
+              <td>{repo.owner?.username || "-"}</td>
               <td>{repo.language || "-"}</td>
               <td>{repo.stars || 0}</td>
               <td>{repo.totalCommits || 0}</td>

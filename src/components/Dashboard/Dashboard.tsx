@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
-import { useQuery, useLazyQuery } from "@apollo/client";
+import { useQuery, useLazyQuery, useMutation } from "@apollo/client";
 import { GET_USER_ACTIVITY, GET_USER } from "../Graphql/Queries";
 import { useAuth } from "../../Context/AuthContext";
 import moment from "moment";
@@ -20,9 +20,12 @@ import {
   faCalendarAlt,
   faExclamationTriangle,
 } from "@fortawesome/free-solid-svg-icons";
+import { FaGithub} from "react-icons/fa";
 import { ClipLoader } from "react-spinners";
 import { motion } from "framer-motion";
 import "./Dashboard.css";
+import { REQUEST_GITHUB_AUTH } from "../Graphql/Mutations";
+import { Button } from "react-bootstrap";
 
 const Dashboard: React.FC = () => {
   const navigate = useNavigate();
@@ -53,7 +56,25 @@ const Dashboard: React.FC = () => {
   }, [githubUsername, fetchUserActivity]);
 
   const useActivity = useMemo(() => data?.getUserActivity || {}, [data]);
-
+  const [requestGithubAuth] = useMutation(REQUEST_GITHUB_AUTH);
+    const handleGithubLogin = async () => {
+      try {
+        const { data: authUrlResult } = await requestGithubAuth({
+          variables: { username: githubUsername },
+        });
+    
+        const redirectUrl = authUrlResult?.requestGithubAuth?.url;
+        if (redirectUrl) {
+          window.location.href = redirectUrl;
+        } else {
+          const message = authUrlResult?.requestGithubAuth?.message || "GitHub auth failed.";
+          alert(message);
+        }
+      } catch (err) {
+        console.error("GitHub Auth Error:", err);
+        alert("GitHub auth failed.");
+      }
+    };
   console.log(useActivity);
   console.log(JSON.stringify(useActivity, null, 2));
 
@@ -67,7 +88,7 @@ const Dashboard: React.FC = () => {
       { title: "Public Repos", data: useActivity.publicRepoCount || 0, icon: faGlobe, color: "#20b2aa" },
       { title: "Private Repos", data: useActivity.privateRepoCount || 0, icon: faLock, color: "#9370db" },
       { title: "Languages Used", data: useActivity.languagesUsed?.join(", ") || "-", icon: faLanguage, color: "#ff8c00" },
-      { title: "Most Active Repo", data: useActivity.topContributedRepo || "-", icon: faFire, color: "#ff4500" },
+      { title: "Recently Created Repo", data: useActivity.topContributedRepo || "-", icon: faFire, color: "#ff4500" },
       { title: "Earliest Repo Created", data: moment(useActivity.earliestRepoCreatedAt).format("DD-MM-YYYY") || "-", icon: faCalendarAlt, color: "#8a2be2" },
       { title: "Most Recently Updated Repo", data: moment(useActivity.mostRecentlyUpdatedRepo).format("DD-MM-YYYY") || "-", icon: faClock, color: "#6495ed" },
       { title: "Last Active", data: moment(useActivity.lastActive).format("DD-MM-YYYY") || "-", icon: faClock, color: "#6495ed" },
@@ -82,8 +103,14 @@ const Dashboard: React.FC = () => {
     <div className="dashboard-container">
       <header className="header">
         <h4 className="header-title text-center">🚀 Developer Performance Dashboard</h4>
+        <div className="text-center">
+          <Button variant="dark" className="me-5 mt-3" onClick={handleGithubLogin}>
+             <FaGithub className="me-1" />
+               Connect GitHub
+          </Button>
+        </div>
       </header>
-
+      
       {loading ? (
         <div className="spinner-container">
           <ClipLoader color="#58a6ff" size={80} />

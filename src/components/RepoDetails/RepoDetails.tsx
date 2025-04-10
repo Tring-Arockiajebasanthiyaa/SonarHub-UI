@@ -4,9 +4,9 @@ import { useAuth } from "../../Context/AuthContext";
 import { useEffect, useState } from "react";
 import { GET_USER, GET_PROJECT_ANALYSIS, GET_REPO_BRANCHES } from "../Graphql/Queries";
 import { motion } from "framer-motion";
-import { TRIGGER_AUTOMATIC_ANALYSIS, ANALYZE_SINGLE_REPOSITORY } from "../Graphql/Mutations";
-import { Badge, ProgressBar, Spinner, Alert, Card, ListGroup, Dropdown, Tab, Tabs, Table } from "react-bootstrap";
-import { FaGithub, FaCode, FaBug, FaShieldAlt, FaExclamationTriangle, FaClock, FaChartLine, FaLanguage, FaCodeBranch } from "react-icons/fa";
+import { TRIGGER_AUTOMATIC_ANALYSIS, ANALYZE_SINGLE_REPOSITORY, TRIGGER_BRANCH_ANALYSIS } from "../Graphql/Mutations";
+import { Badge, ProgressBar, Spinner, Alert, Card, ListGroup, Dropdown, Table, Button } from "react-bootstrap";
+import { FaGithub, FaCode, FaBug, FaShieldAlt, FaExclamationTriangle, FaChartLine, FaCodeBranch } from "react-icons/fa";
 import { GiSpiderWeb } from "react-icons/gi";
 import { RiGitRepositoryLine } from "react-icons/ri";
 import { BsGraphUp, BsFileCode } from "react-icons/bs";
@@ -149,6 +149,29 @@ const RepoDetails = () => {
     },
   });
 
+  const [triggerBranchAnalysis, { loading: isAnalyzingBranch }] = useMutation(TRIGGER_BRANCH_ANALYSIS, {
+    onCompleted: () => {
+      setAnalysisStatus(`Analysis completed for branch ${selectedBranch}`);
+      refetch();
+    },
+    onError: (err) => {
+      setLastError(err.message);
+    },
+  });
+
+  const handleTriggerBranchAnalysis = () => {
+    if (!githubUsername || !cleanRepoName || !selectedBranch) return;
+    setAnalysisStatus(`Analyzing branch ${selectedBranch}...`);
+    setLastError(null);
+    triggerBranchAnalysis({ 
+      variables: { 
+        githubUsername, 
+        repoName: cleanRepoName, 
+        branchName: selectedBranch 
+      } 
+    });
+  };
+
   const handleAnalyzeRepository = () => {
     if (!githubUsername || !repoName) return;
     setIsAnalyzing(true);
@@ -207,7 +230,13 @@ const RepoDetails = () => {
     return colors[language] || 'info';
   };
 
-  const LoadingScreen = ({ message = "Loading repository data..." }: { message?: string }) => {
+  const LoadingScreen = ({ 
+    message = "Loading repository data...",
+    showAnalyzeButton = false
+  }: { 
+    message?: string;
+    showAnalyzeButton?: boolean;
+  }) => {
     const loadingMessages = [
       "Analyzing code quality...",
       "Checking for vulnerabilities...",
@@ -261,6 +290,26 @@ const RepoDetails = () => {
         <div className="text-muted">
           <small>Fetching data from {repoName} repository...</small>
         </div>
+        {showAnalyzeButton && (
+          <Button
+            variant="primary"
+            onClick={handleTriggerBranchAnalysis}
+            disabled={!githubUsername || !repoName || !selectedBranch || isAnalyzingBranch}
+            className="mt-4"
+          >
+            {isAnalyzingBranch ? (
+              <>
+                <Spinner as="span" animation="border" size="sm" className="me-2" />
+                Analyzing...
+              </>
+            ) : (
+              <>
+                <i className="bi bi-graph-up-arrow me-2"></i>
+                Analyze Selected Branch
+              </>
+            )}
+          </Button>
+        )}
       </div>
     );
   };
@@ -268,7 +317,7 @@ const RepoDetails = () => {
   if (!repoName) return <div className="container py-4"><Alert variant="danger">Repository name missing</Alert></div>;
 
   if (branchesLoading || (loading && !data)) {
-    return <LoadingScreen />;
+    return <LoadingScreen showAnalyzeButton={!!selectedBranch} />;
   }
 
   if (branchesError) {
@@ -338,6 +387,24 @@ const RepoDetails = () => {
                 </>
               )}
             </button>
+            <Button
+              variant="info"
+              onClick={handleTriggerBranchAnalysis}
+              disabled={!githubUsername || !repoName || !selectedBranch || isAnalyzingBranch}
+              className="btn-lg"
+            >
+              {isAnalyzingBranch ? (
+                <>
+                  <Spinner as="span" animation="border" size="sm" className="me-2" />
+                  Analyzing...
+                </>
+              ) : (
+                <>
+                  <i className="bi bi-graph-up-arrow me-2"></i>
+                  Analyze Selected Branch
+                </>
+              )}
+            </Button>
             {githubUsername && (
               <button 
                 onClick={handleAnalyzeAllRepos} 
@@ -426,6 +493,23 @@ const RepoDetails = () => {
               ))}
             </Dropdown.Menu>
           </Dropdown>
+          <Button
+            variant="primary"
+            onClick={handleTriggerBranchAnalysis}
+            disabled={!githubUsername || !repoName || !selectedBranch || isAnalyzingBranch}
+          >
+            {isAnalyzingBranch ? (
+              <>
+                <Spinner as="span" animation="border" size="sm" className="me-2" />
+                Analyzing...
+              </>
+            ) : (
+              <>
+                <i className="bi bi-graph-up-arrow me-2"></i>
+                Analyze Branch
+              </>
+            )}
+          </Button>
           <button onClick={handleReanalyze} className="btn btn-primary" disabled={isAnalyzing}>
             <i className="bi bi-arrow-repeat me-2"></i>Reanalyze
           </button>
@@ -447,7 +531,7 @@ const RepoDetails = () => {
             <Card.Body>
               <ListGroup variant="flush" className="bg-transparent">
                 <ListGroup.Item className="bg-transparent text-light border-secondary">
-                  <strong>Title:</strong> {project?.title || 'N/A'}
+                  <strong>Title:</strong> {project?.title || '-'}
                 </ListGroup.Item>
                 <ListGroup.Item className="bg-transparent text-light border-secondary">
                   <strong>Description:</strong> {project?.description || 'None'}
@@ -455,7 +539,7 @@ const RepoDetails = () => {
                 <ListGroup.Item className="bg-transparent text-light border-secondary">
                   <strong>URL:</strong>{' '}
                   <a href={project?.githubUrl} target="_blank" rel="noopener noreferrer" className="text-info">
-                    {project?.githubUrl || 'N/A'}
+                    {project?.githubUrl || '-'}
                   </a>
                 </ListGroup.Item>
                 <ListGroup.Item className="bg-transparent text-light border-secondary">
@@ -465,10 +549,10 @@ const RepoDetails = () => {
                   </Badge>
                 </ListGroup.Item>
                 <ListGroup.Item className="bg-transparent text-light border-secondary">
-                  <strong>Owner:</strong> {project?.user?.name || 'N/A'}
+                  <strong>Owner:</strong> {project?.user?.name || '-'}
                 </ListGroup.Item>
                 <ListGroup.Item className="bg-transparent text-light border-secondary">
-                  <strong>Email:</strong> {project?.user?.email || 'N/A'}
+                  <strong>Email:</strong> {project?.user?.email || '-'}
                 </ListGroup.Item>
               </ListGroup>
             </Card.Body>
@@ -484,7 +568,7 @@ const RepoDetails = () => {
             <Card.Body>
               <ListGroup variant="flush" className="bg-transparent">
                 <ListGroup.Item className="bg-transparent text-light border-secondary">
-                  <strong>Current Branch:</strong> {selectedBranch || 'N/A'}
+                  <strong>Current Branch:</strong> {selectedBranch || '-'}
                 </ListGroup.Item>
                 <ListGroup.Item className="bg-transparent text-light border-secondary">
                   <strong>Default Branch:</strong> {project?.defaultBranch || 'master'}
@@ -495,7 +579,7 @@ const RepoDetails = () => {
                     <a href={currentBranch.dashboardUrl} target="_blank" rel="noopener noreferrer" className="text-info">
                       View Dashboard
                     </a>
-                  ) : 'N/A'}
+                  ) : '-'}
                 </ListGroup.Item>
                 <ListGroup.Item className="bg-transparent text-light border-secondary">
                   <strong>Last Analyzed:</strong>{' '}
@@ -617,7 +701,7 @@ const RepoDetails = () => {
                 </div>
                 <div className="d-flex justify-content-between mb-2">
                   <span className="text-light">Last Updated:</span>
-                  <strong className="text-white">{locReport?.lastUpdated ? new Date(locReport.lastUpdated).toLocaleString() : 'N/A'}</strong>
+                  <strong className="text-white">{locReport?.lastUpdated ? new Date(locReport.lastUpdated).toLocaleString() : '-'}</strong>
                 </div>
               </div>
               
@@ -653,125 +737,126 @@ const RepoDetails = () => {
         </div>
 
         <div className="col-md-6">
-        <Card className="h-100 bg-dark border-secondary">
-          <Card.Header className="bg-primary text-white d-flex align-items-center">
-           <FaShieldAlt className="me-2" />
+          <Card className="h-100 bg-dark border-secondary">
+            <Card.Header className="bg-primary text-white d-flex align-items-center">
+              <FaShieldAlt className="me-2" />
               <h5 className="mb-0">Quality Gate Status</h5>
-                </Card.Header>
-                  <Card.Body>
-                     {branchMetrics ? (
-                     <div>
-                        <div className="text-center mb-4">
-                          <h4 className="text-light mb-3">Overall Quality</h4>
-                          <Badge bg={branchMetrics.qualityGateStatus === 'OK' ? 'success' : 'danger'} className="fs-4 p-3">
-                            {branchMetrics.qualityGateStatus || 'UNKNOWN'}
+            </Card.Header>
+            <Card.Body>
+              {branchMetrics ? (
+                <div>
+                  <div className="text-center mb-4">
+                    <h4 className="text-light mb-3">Overall Quality</h4>
+                    <Badge bg={branchMetrics.qualityGateStatus === 'OK' ? 'success' : 'danger'} className="fs-4 p-3">
+                      {branchMetrics.qualityGateStatus || '-'}
+                    </Badge>
+                  </div>
+                  <h5 className="text-light mb-3 border-bottom pb-2">Issue Summary</h5>
+                  <div className="row mb-4">
+                    <div className="col-4">
+                      <div className="text-center p-3 bg-dark-800 rounded">
+                        <h6 className="text-info">Bugs</h6>
+                        <h3 className="text-white">{branchMetrics.bugs || 0}</h3>
+                      </div>
+                    </div>
+                    <div className="col-4">
+                      <div className="text-center p-3 bg-dark-800 rounded w-20">
+                        <h6 className="text-danger">Vulnerabilities</h6>
+                        <h3 className="text-white">{branchMetrics.vulnerabilities || 0}</h3>
+                      </div>
+                    </div>
+                    <div className="col-4">
+                      <div className="text-center p-3 bg-dark-800 rounded">
+                        <h6 className="text-warning">Code Smells</h6>
+                        <h3 className="text-white">{branchMetrics.codeSmells || 0}</h3>
+                      </div>
+                    </div>
+                  </div>
+                  <h5 className="text-light mb-3 border-bottom pb-2">Ratings</h5>
+                  <div className="row mb-4">
+                    <div className="col-6">
+                      <div className="p-3 bg-dark-800 rounded h-100">
+                        <h6 className="text-info">Reliability Rating</h6>
+                        <div className="d-flex align-items-center mb-2">
+                          <h3 className="text-white me-3 mb-0">{branchMetrics.reliabilityRating || 0}/5</h3>
+                          <Badge bg={branchMetrics.reliabilityRating <= 2 ? 'success' : 
+                                     branchMetrics.reliabilityRating <= 3 ? 'warning' : 'danger'}>
+                            {branchMetrics.reliabilityRating <= 2 ? 'Good' : 
+                             branchMetrics.reliabilityRating <= 3 ? 'Fair' : 'Poor'}
                           </Badge>
                         </div>
-                        <h5 className="text-light mb-3 border-bottom pb-2">Issue Summary</h5>
-                          <div className="row mb-4">
-                            <div className="col-4">
-                              <div className="text-center p-3 bg-dark-800 rounded">
-                                <h6 className="text-info">Bugs</h6>
-                                  <h3 className="text-white">{branchMetrics.bugs || 0}</h3>
-                              </div>
-                            </div>
-                          <div className="col-4">
-                            <div className="text-center p-3 bg-dark-800 rounded">
-                              <h6 className="text-danger">Vulnerabilities</h6>
-                                <h3 className="text-white">{branchMetrics.vulnerabilities || 0}</h3>
-                            </div>
-                          </div>
-                         <div className="col-4">
-                           <div className="text-center p-3 bg-dark-800 rounded">
-                              <h6 className="text-warning">Code Smells</h6>
-                              <h3 className="text-white">{branchMetrics.codeSmells || 0}</h3>
-                            </div>
-                          </div>
+                        <ProgressBar 
+                          now={(branchMetrics.reliabilityRating || 0) * 20} 
+                          variant={
+                            branchMetrics.reliabilityRating <= 2 ? 'success' : 
+                            branchMetrics.reliabilityRating <= 3 ? 'warning' : 'danger'
+                          }
+                          className="progress-bar-striped"
+                        />
+                      </div>
+                    </div>
+                    <div className="col-6">
+                      <div className="p-3 bg-dark-800 rounded h-100">
+                        <h6 className="text-info">Security Rating</h6>
+                        <div className="d-flex align-items-center mb-2">
+                          <h3 className="text-white me-3 mb-0">{branchMetrics.securityRating || 0}/5</h3>
+                          <Badge bg={
+                            branchMetrics.securityRating <= 2 ? 'success' : 
+                            branchMetrics.securityRating <= 3 ? 'warning' : 'danger'
+                          }>
+                            {branchMetrics.securityRating <= 2 ? 'Good' : 
+                             branchMetrics.securityRating <= 3 ? 'Fair' : 'Poor'}
+                          </Badge>
                         </div>
-                        <h5 className="text-light mb-3 border-bottom pb-2">Ratings</h5>
-                        <div className="row mb-4">
-                        <div className="col-6">
-                            <div className="p-3 bg-dark-800 rounded h-100">
-                              <h6 className="text-info">Reliability Rating</h6>
-                                <div className="d-flex align-items-center mb-2">
-                                   <h3 className="text-white me-3 mb-0">{branchMetrics.reliabilityRating || 0}/5</h3>
-                                      <Badge bg={branchMetrics.reliabilityRating <= 2 ? 'success' : 
-                                       branchMetrics.reliabilityRating <= 3 ? 'warning' : 'danger'}>
-                                       {branchMetrics.reliabilityRating <= 2 ? 'Good' : 
-                                       branchMetrics.reliabilityRating <= 3 ? 'Fair' : 'Poor'}
-                                      </Badge>
-                                  </div>
-              <ProgressBar 
-                now={(branchMetrics.reliabilityRating || 0) * 20} 
-                variant={
-                  branchMetrics.reliabilityRating <= 2 ? 'success' : 
-                  branchMetrics.reliabilityRating <= 3 ? 'warning' : 'danger'
-                }
-                className="progress-bar-striped"
-              />
-            </div>
-          </div>
-          <div className="col-6">
-            <div className="p-3 bg-dark-800 rounded h-100">
-              <h6 className="text-info">Security Rating</h6>
-              <div className="d-flex align-items-center mb-2">
-                <h3 className="text-white me-3 mb-0">{branchMetrics.securityRating || 0}/5</h3>
-                <Badge bg={
-                  branchMetrics.securityRating <= 2 ? 'success' : 
-                  branchMetrics.securityRating <= 3 ? 'warning' : 'danger'
-                }>
-                  {branchMetrics.securityRating <= 2 ? 'Good' : 
-                   branchMetrics.securityRating <= 3 ? 'Fair' : 'Poor'}
-                </Badge>
-              </div>
-              <ProgressBar 
-                now={(branchMetrics.securityRating || 0) * 20} 
-                variant={
-                  branchMetrics.securityRating <= 2 ? 'success' : 
-                  branchMetrics.securityRating <= 3 ? 'warning' : 'danger'
-                }
-                className="progress-bar-striped"
-              />
-            </div>
-          </div>
-        </div>
-        <h5 className="text-light mb-3 border-bottom pb-2">Technical Debt</h5>
-        <div className="p-3 bg-dark-800 rounded">
-          <h6 className="text-warning">Debt Ratio</h6>
-          <div className="d-flex align-items-center mb-2">
-            <h3 className="text-white me-3 mb-0">{branchMetrics.debtRatio?.toFixed(2) || 0}%</h3>
-            <Badge bg={
-              branchMetrics.debtRatio < 5 ? 'success' : 
-              branchMetrics.debtRatio < 10 ? 'warning' : 'danger'
-            }>
-              {branchMetrics.debtRatio < 5 ? 'Low' : 
-               branchMetrics.debtRatio < 10 ? 'Medium' : 'High'}
-            </Badge>
-          </div>
-          <ProgressBar 
-            now={branchMetrics.debtRatio || 0} 
-            variant={
-              branchMetrics.debtRatio < 5 ? 'success' : 
-              branchMetrics.debtRatio < 10 ? 'warning' : 'danger'
-            }
-            className="progress-bar-striped"
-          />
-          <small className="text-muted mt-2 d-block">
-            {branchMetrics.debtRatio < 5 ? 'Minimal technical debt' : 
-             branchMetrics.debtRatio < 10 ? 'Moderate technical debt' : 'High technical debt'}
-          </small>
+                        <ProgressBar 
+                          now={(branchMetrics.securityRating || 0) * 20} 
+                          variant={
+                            branchMetrics.securityRating <= 2 ? 'success' : 
+                            branchMetrics.securityRating <= 3 ? 'warning' : 'danger'
+                          }
+                          className="progress-bar-striped"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                  <h5 className="text-light mb-3 border-bottom pb-2">Technical Debt</h5>
+                  <div className="p-3 bg-dark-800 rounded">
+                    <h6 className="text-warning">Debt Ratio</h6>
+                    <div className="d-flex align-items-center mb-2">
+                      <h3 className="text-white me-3 mb-0">{branchMetrics.debtRatio?.toFixed(2) || 0}%</h3>
+                      <Badge bg={
+                        branchMetrics.debtRatio < 5 ? 'success' : 
+                        branchMetrics.debtRatio < 10 ? 'warning' : 'danger'
+                      }>
+                        {branchMetrics.debtRatio < 5 ? 'Low' : 
+                         branchMetrics.debtRatio < 10 ? 'Medium' : 'High'}
+                      </Badge>
+                    </div>
+                    <ProgressBar 
+                      now={branchMetrics.debtRatio || 0} 
+                      variant={
+                        branchMetrics.debtRatio < 5 ? 'success' : 
+                        branchMetrics.debtRatio < 10 ? 'warning' : 'danger'
+                      }
+                      className="progress-bar-striped"
+                    />
+                    <small className="text-muted mt-2 d-block">
+                      {branchMetrics.debtRatio < 5 ? 'Minimal technical debt' : 
+                       branchMetrics.debtRatio < 10 ? 'Moderate technical debt' : 'High technical debt'}
+                    </small>
+                  </div>
+                </div>
+              ) : (
+                <Alert variant="info" className="text-center">
+                  <h5>No Quality Gate Data Available</h5>
+                  <p className="mb-0">Run an analysis to see quality metrics</p>
+                </Alert>
+              )}
+            </Card.Body>
+          </Card>
         </div>
       </div>
-      ) : (
-      <Alert variant="info" className="text-center">
-        <h5>No Quality Gate Data Available</h5>
-        <p className="mb-0">Run an analysis to see quality metrics</p>
-      </Alert>
-      )}
-      </Card.Body>
-      </Card>
-      </div>
-      </div>
+
       <Card className="mb-4 bg-dark border-secondary">
         <Card.Header className="bg-primary text-white d-flex justify-content-between align-items-center">
           <h5 className="mb-0 d-flex align-items-center">
@@ -818,75 +903,183 @@ const RepoDetails = () => {
               <i className="bi bi-check-circle-fill text-success fs-1 mb-3"></i>
               <h5 className="text-success">No issues found</h5>
               {project?.result === "Analysis completed" && (
-                <p className="text-muted">The code analysis found no issues in this branch</p>
+                <div className="mt-4">
+                  <Button 
+                    variant="primary"
+                    onClick={handleTriggerBranchAnalysis}
+                    disabled={isAnalyzingBranch}
+                  >
+                    {isAnalyzingBranch ? (
+                      <>
+                        <Spinner as="span" animation="border" size="sm" className="me-2" />
+                        Analyzing...
+                      </>
+                    ) : (
+                      <>
+                        <i className="bi bi-graph-up-arrow me-2"></i>
+                        Run Analysis Again
+                      </>
+                    )}
+                  </Button>
+                </div>
               )}
             </div>
           )}
         </Card.Body>
       </Card>
-
       <Card className="mb-4 bg-dark border-secondary">
-        <Card.Header className="bg-primary text-white d-flex align-items-center">
-          <FaChartLine className="me-2" />
-          <h5 className="mb-0">All Branches ({branches.length})</h5>
-        </Card.Header>
-        <Card.Body>
-          <Table striped bordered hover variant="dark">
-            <thead>
-              <tr>
-                <th>Name</th>
-                <th>Status</th>
-                <th>Dashboard</th>
-                <th>Metrics</th>
+      <Card.Header className="bg-primary text-white d-flex align-items-center">
+        <FaChartLine className="me-2" />
+        <h5 className="mb-0">
+        All Branches (
+      {branches.filter((branch: Branch, index: number, self: Branch[]) => 
+        index === self.findIndex((b: Branch) => b.name === branch.name)
+      ).length})
+     </h5>
+     </Card.Header>
+      <Card.Body>
+      <Table striped bordered hover variant="dark">
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Status</th>
+          <th>Dashboard</th>
+          <th>Metrics</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+      {branches
+          .filter((branch: Branch, index: number, self: Branch[]) => 
+            index === self.findIndex((b: Branch) => b.name === branch.name)
+          )
+          .map((branch: Branch) => {
+            const metrics = allCodeMetrics.find((m: CodeMetric) => m.branch === branch.name);
+            const issues = allSonarIssues.filter((i: SonarIssue) => i.branch === branch.name);
+            
+            return (
+              <tr key={`${branch.name}-${branch.dashboardUrl}`}>
+                <td>
+                  {branch.name}
+                  {branch.name === selectedBranch && (
+                    <Badge bg="info" className="ms-2">Current</Badge>
+                  )}
+                  {branch.name === project?.defaultBranch && (
+                    <Badge bg="primary" className="ms-2">Default</Badge>
+                  )}
+                </td>
+                <td>
+                  {metrics ? (
+                    <Badge bg={metrics.qualityGateStatus === 'OK' ? 'success' : 'danger'}>
+                      {metrics.qualityGateStatus || '-'}
+                    </Badge>
+                  ) : '-'}
+                </td>
+                <td>
+                  {branch.dashboardUrl ? (
+                    <a 
+                      href={branch.dashboardUrl} 
+                      target="_blank" 
+                      rel="noopener noreferrer" 
+                      className="text-info"
+                    >
+                      View Dashboard
+                    </a>
+                  ) : '-'}
+                </td>
+                <td>
+                  {metrics ? (
+                    <div className="d-flex flex-wrap gap-2">
+                      <Badge bg="secondary">{metrics.linesOfCode} LOC</Badge>
+                      <Badge bg={
+                        metrics.coverage > 80 ? 'success' : 
+                        metrics.coverage > 50 ? 'warning' : 'danger'
+                      }>
+                        {metrics.coverage?.toFixed(2)}% Coverage
+                      </Badge>
+                      <Badge bg="info">{issues.length} Issues</Badge>
+                    </div>
+                  ) : 'No metrics'}
+                </td>
+                <td>
+                  <div className="d-flex gap-2">
+                    <Button
+                      variant={branch.name === selectedBranch ? 'primary' : 'outline-primary'}
+                      size="sm"
+                      onClick={() => handleBranchChange(branch.name)}
+                      disabled={branch.name === selectedBranch}
+                    >
+                      <i className="bi bi-eye me-1"></i>
+                      View
+                    </Button>
+                    <Button
+                      variant="outline-success"
+                      size="sm"
+                      onClick={() => {
+                        setSelectedBranch(branch.name);
+                        handleTriggerBranchAnalysis();
+                      }}
+                      disabled={isAnalyzingBranch && branch.name === selectedBranch}
+                    >
+                      {isAnalyzingBranch && branch.name === selectedBranch ? (
+                        <Spinner as="span" animation="border" size="sm" className="me-1" />
+                      ) : (
+                        <i className="bi bi-graph-up-arrow me-1"></i>
+                      )}
+                      Analyze
+                    </Button>
+                  </div>
+                </td>
               </tr>
-            </thead>
-            <tbody>
-              {branches.map((branch: Branch) => {
-                const metrics = allCodeMetrics.find((m: CodeMetric) => m.branch === branch.name);
-                const issues = allSonarIssues.filter((i: SonarIssue) => i.branch === branch.name);
-                return (
-                  <tr key={branch.name}>
-                    <td>
-                      {branch.name}
-                      {branch.name === selectedBranch && (
-                        <Badge bg="info" className="ms-2">Current</Badge>
-                      )}
-                      {branch.name === project?.defaultBranch && (
-                        <Badge bg="primary" className="ms-2">Default</Badge>
-                      )}
-                    </td>
-                    <td>
-                      {metrics ? (
-                        <Badge bg={metrics.qualityGateStatus === 'OK' ? 'success' : 'danger'}>
-                          {metrics.qualityGateStatus || 'UNKNOWN'}
-                        </Badge>
-                      ) : 'N/A'}
-                    </td>
-                    <td>
-                      {branch.dashboardUrl ? (
-                        <a href={branch.dashboardUrl} target="_blank" rel="noopener noreferrer" className="text-info">
-                          View Dashboard
-                        </a>
-                      ) : 'N/A'}
-                    </td>
-                    <td>
-                      {metrics ? (
-                        <div className="d-flex flex-wrap gap-2">
-                          <Badge bg="secondary">{metrics.linesOfCode} LOC</Badge>
-                          <Badge bg={metrics.coverage > 80 ? 'success' : metrics.coverage > 50 ? 'warning' : 'danger'}>
-                            {metrics.coverage?.toFixed(2)}% Coverage
-                          </Badge>
-                          <Badge bg="info">{issues.length} Issues</Badge>
-                        </div>
-                      ) : 'No metrics'}
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </Table>
-        </Card.Body>
-      </Card>
+            );
+          })}
+      </tbody>
+    </Table>
+  </Card.Body>
+        </Card>
+      <div className="d-flex justify-content-between mb-4">
+        <div>
+          {analysisStatus && (
+            <Alert variant="info" className="mb-0">
+              <i className="bi bi-info-circle me-2"></i>
+              {analysisStatus}
+            </Alert>
+          )}
+          {lastError && (
+            <Alert variant="danger" className="mb-0">
+              <i className="bi bi-exclamation-triangle me-2"></i>
+              {lastError}
+            </Alert>
+          )}
+        </div>
+        <div className="d-flex gap-3">
+          <Button
+            variant="outline-secondary"
+            onClick={() => refetch()}
+            disabled={loading}
+          >
+            <i className="bi bi-arrow-clockwise me-2"></i>
+            Refresh All Data
+          </Button>
+          <Button
+            variant="danger"
+            onClick={handleAnalyzeAllRepos}
+            disabled={isAnalyzingAll}
+          >
+            {isAnalyzingAll ? (
+              <>
+                <Spinner as="span" animation="border" size="sm" className="me-2" />
+                Analyzing All...
+              </>
+            ) : (
+              <>
+                <i className="bi bi-collection me-2"></i>
+                Analyze All Branches
+              </>
+            )}
+          </Button>
+        </div>
+      </div>
     </div>
   );
 };

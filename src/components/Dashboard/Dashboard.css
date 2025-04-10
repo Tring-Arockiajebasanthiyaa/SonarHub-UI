@@ -100,3 +100,89 @@ body {
   width: fit-content;
   align-items: right;
 }
+
+@media (max-width: 768px) {
+  .sidebar {
+    width: 100%;
+    height: auto;
+    position: relative;
+    padding: 1rem;
+    border-right: none;
+    border-bottom: 1px solid #30363d;
+  }
+  
+  .main-content {
+    margin-left: 0;
+    width: 100%;
+    padding: 1rem;
+  }
+  
+  .card-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .header-title {
+    font-size: 1.3rem;
+  }
+}
+
+
+@media (min-width: 769px) and (max-width: 1024px) {
+  .sidebar {
+    width: 200px;
+  }
+  
+  .main-content {
+    margin-left: 200px;
+    width: calc(100% - 200px);
+  }
+  
+  .card-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+
+@media (max-width: 480px) {
+  .sidebar {
+    padding: 0.5rem;
+  }
+  
+  .main-content {
+    padding: 0.5rem;
+  }
+  
+  .card {
+    padding: 1rem;
+  }
+  
+  .header-title {
+    font-size: 1.1rem;
+  }
+  
+  .card-title {
+    font-size: 0.9rem;
+  }
+  
+  .card-data {
+    font-size: 1rem;
+  }
+}
+
+
+@media (max-height: 500px) and (orientation: landscape) {
+  .sidebar {
+    width: 180px;
+    padding: 0.5rem;
+  }
+  
+  .main-content {
+    margin-left: 180px;
+    width: calc(100% - 180px);
+    padding: 0.5rem;
+  }
+  
+  .card-grid {
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  }
+}

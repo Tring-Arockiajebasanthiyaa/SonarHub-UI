@@ -4,6 +4,7 @@ import { useAuth } from "../../Context/AuthContext";
 import "../DashboardLayout/DashboardLayout.css";
 import { FaTachometerAlt, FaGithub, FaChartBar, FaQuestionCircle, FaSignOutAlt } from "react-icons/fa";
 import sonarLogo from "../../assets/logo.webp";
+import { FaCodePullRequest } from "react-icons/fa6";
 
 const DashboardLayout: React.FC = () => {
   const navigate = useNavigate();
@@ -12,6 +13,7 @@ const DashboardLayout: React.FC = () => {
     { title: "Dashboard", path: "/dashboard", icon: <FaTachometerAlt /> },
     { title: "Repo Explorer", path: "/dashboard/github-repos", icon: <FaGithub /> },
     { title: "Sonar Insights", path: "/dashboard/sonar-repo", icon: <FaChartBar /> },
+    { title: "Pull Requests", path: "/dashboard/pull-requests",icon: <FaCodePullRequest /> },
     { title: "Knowledge Hub", path: "/dashboard/learn-more", icon: <FaQuestionCircle /> },
   ];
 

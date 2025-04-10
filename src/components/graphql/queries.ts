@@ -210,3 +210,41 @@ export const GET_REPO_BRANCHES = gql`
     }
   }
 `;
+
+export const GET_BRANCHES_BY_USERNAME_AND_REPO = gql`
+  query GetBranchesByUsernameAndRepo($githubUsername: String!, $repoName: String!) {
+    getBranchesByUsernameAndRepo(githubUsername: $githubUsername, repoName: $repoName) {
+      name
+      repoName
+      username
+    }
+  }
+`;
+
+
+export const GET_PULL_REQUESTS_BY_BRANCH = gql`
+  query GetPullRequestsByBranch($branchName: String!, $repoName: String!, $githubUsername: String!) {
+    getPullRequestsByBranch(branchName: $branchName, repoName: $repoName, githubUsername: $githubUsername) {
+      prId
+      title
+      state
+      author
+      createdAt
+      closedAt
+      additions
+      deletions
+      changedFiles
+    }
+  }
+`;
+
+export const GET_PR_COMMENTS = gql`
+  query GetPRComments($username: String!, $repoName: String!, $prId: Int!) {
+    getPRComments(username: $username, repoName: $repoName, prId: $prId) {
+      id
+      body
+      userLogin
+      createdAt
+    }
+  }
+`;

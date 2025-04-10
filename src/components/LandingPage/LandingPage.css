@@ -12,12 +12,10 @@
   background-size: cover;
   animation: fadeIn 1s ease-out;
 }
-
 @keyframes fadeIn {
   from { opacity: 0; }
   to { opacity: 1; }
 }
-
 .navbar {
   width: 100%;
   display: flex;
@@ -27,12 +25,10 @@
   padding: 1rem 2rem;
   animation: slideDown 0.8s ease-out;
 }
-
 @keyframes slideDown {
   from { transform: translateY(-50px); opacity: 0; }
   to { transform: translateY(0); opacity: 1; }
 }
-
 .logo-img {
   height: 80px;
   border-radius: 50%;
@@ -40,12 +36,10 @@
   object-fit: contain;
   animation: zoomIn 0.6s ease-out;
 }
-
 @keyframes zoomIn {
   from { transform: scale(0.8); opacity: 0; }
   to { transform: scale(1); opacity: 1; }
 }
-
 .auth-buttons {
   margin-left: auto;
   display: flex;
@@ -54,12 +48,10 @@
   width: auto;
   animation: slideLeft 0.8s ease-out;
 }
-
 @keyframes slideLeft {
   from { transform: translateX(50px); opacity: 0; }
   to { transform: translateX(0); opacity: 1; }
 }
-
 .nav-link {
   border-radius: 5px;
   border: #bbb 1px solid;
@@ -68,33 +60,27 @@
   text-decoration: none;
   transition: background 0.3s ease, color 0.3s ease, transform 0.2s ease-in-out;
 }
-
 .nav-link:hover {
   background: #121212;
   color: white;
   transform: translateY(-3px);
 }
-
 .nav-link.signin {
   border-color: #58a6ff;
   color: #58a6ff;
 }
-
 .nav-link.signup {
   border-color: #4caf50;
   color: #4caf50;
 }
-
 .nav-link.signin:hover {
   background: #58a6ff;
   color: #000;
 }
-
 .nav-link.signup:hover {
   background: #4caf50;
   color: #000;
 }
-
 .hero {
   flex: 1;
   display: flex;
@@ -106,12 +92,10 @@
   padding: 0 5%;
   animation: fadeInUp 0.8s ease-out;
 }
-
 @keyframes fadeInUp {
   from { transform: translateY(50px); opacity: 0; }
   to { transform: translateY(0); opacity: 1; }
 }
-
 .hero-title {
   font-size: 3.5rem;
   font-weight: bold;
@@ -119,19 +103,16 @@
   text-transform: uppercase;
   color: #d1d1d1;
 }
-
 .hero-subtitle {
   font-size: 2rem;
   color: #bbb;
 }
-
 .hero-text {
   margin: 20px auto;
   width: 50%;
   font-size: 1.2rem;
   color: #bbb;
 }
-
 .hero-buttons {
   margin-top: 30px;
   display: flex;
@@ -142,12 +123,10 @@
   white-space: nowrap;
   animation: scaleUp 0.7s ease-out;
 }
-
 @keyframes scaleUp {
   from { transform: scale(0.8); opacity: 0; }
   to { transform: scale(1); opacity: 1; }
 }
-
 .hero-buttons button {
   font-size: 1.5rem;
   border: 2px solid #bbb;
@@ -158,18 +137,15 @@
   transition: background 0.3s ease, color 0.3s ease, transform 0.2s ease-in-out;
   padding: 10px 20px;
 }
-
 .hero-buttons .watch-video {
   background: #000;
 }
-
 .hero-buttons .watch-video:hover,
 .hero-buttons .get-started:hover {
   background: #121212;
   color: white;
   transform: translateY(-3px);
 }
-
 .video-container {
   display: flex;
   flex-direction: column;
@@ -178,18 +154,15 @@
   height: 100vh;
   background-color: black;
 }
-
 .video-wrapper {
   width: 80%;
   max-width: 800px;
 }
-
 iframe {
   width: 100%;
   height: 450px;
   border: none;
 }
-
 .back-button {
   position: absolute;
   top: 20px;
@@ -202,7 +175,159 @@ iframe {
   font-size: 16px;
   cursor: pointer;
 }
-
 .back-button:hover {
   background-color: #ddd;
+}
+
+/* Mobile Responsive Styles */
+@media (max-width: 768px) {
+  .landing-container {
+    padding: 0 10px;
+  }
+  .navbar {
+    padding: 1rem;
+  }
+  .logo-img {
+    height: 60px;
+  }
+  .auth-buttons {
+    gap: 10px;
+  }
+  .nav-link {
+    padding: 8px 12px;
+    font-size: 0.9rem;
+  }
+  .hero-title {
+    font-size: 2rem;
+  }
+  .hero-subtitle {
+    font-size: 1.5rem;
+  }
+  .hero-text {
+    width: 90%;
+    font-size: 1rem;
+  }
+  .hero-buttons {
+    width: 90%;
+    flex-direction: column;
+    gap: 15px;
+  }
+  .hero-buttons button {
+    font-size: 1.2rem;
+    width: 100%;
+  }
+  .video-wrapper {
+    width: 95%;
+  }
+  iframe {
+    height: 250px;
+  }
+}
+
+@media (max-width: 480px) {
+  .hero-title {
+    font-size: 1.8rem;
+  }
+  .hero-subtitle {
+    font-size: 1.2rem;
+  }
+  .nav-link {
+    padding: 6px 10px;
+    font-size: 0.8rem;
+  }
+  .logo-img {
+    height: 50px;
+  }
+}
+
+@media (max-width: 767px) {
+  .landing-container {
+    padding: 0 10px;
+  }
+  .navbar {
+    padding: 0.5rem;
+  }
+  .logo-img {
+    height: 50px;
+  }
+  .auth-buttons {
+    gap: 8px;
+  }
+  .nav-link {
+    padding: 6px 10px;
+    font-size: 0.8rem;
+  }
+  .hero-title {
+    font-size: 1.8rem;
+  }
+  .hero-subtitle {
+    font-size: 1.2rem;
+  }
+  .hero-text {
+    width: 95%;
+    font-size: 1rem;
+  }
+  .hero-buttons {
+    width: 100%;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .hero-buttons button {
+    font-size: 1rem;
+    width: 100%;
+  }
+  .video-wrapper {
+    width: 95%;
+  }
+  iframe {
+    height: 200px;
+  }
+}
+
+@media (min-width: 768px) and (max-width: 1023px) {
+  .hero-title {
+    font-size: 2.5rem;
+  }
+  .hero-subtitle {
+    font-size: 1.8rem;
+  }
+  .hero-text {
+    width: 80%;
+  }
+  .hero-buttons {
+    width: 50%;
+  }
+  iframe {
+    height: 400px;
+  }
+}
+
+@media (min-width: 1024px) and (max-width: 1439px) {
+  .hero-title {
+    font-size: 3rem;
+  }
+  .hero-subtitle {
+    font-size: 2rem;
+  }
+}
+
+
+@media (min-width: 1440px) {
+  .hero {
+    max-width: 1400px;
+    margin: 0 auto;
+  }
+}
+
+@media (max-height: 500px) and (orientation: landscape) {
+  .hero {
+    padding-top: 20px;
+    padding-bottom: 20px;
+  }
+  .hero-title {
+    font-size: 2rem !important;
+  }
+  .hero-buttons {
+    margin-top: 10px;
+  }
 }
