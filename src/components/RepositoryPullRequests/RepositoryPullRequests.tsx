@@ -108,7 +108,7 @@ const RepositoryCards = () => {
                   <div className="mb-3">
                     <Badge bg="secondary" className="me-2">
                       <FaCode className="me-1" />
-                      {repo.language || 'Unknown'}
+                      {repo.language || '-'}
                     </Badge>
                     <Badge bg="warning" className="me-2">
                       <FaStar className="me-1" />
@@ -159,7 +159,7 @@ const RepositoryCards = () => {
                         <FaGithub className="me-2" />
                         {repo.name}
                       </td>
-                      <td>{repo.language || 'Unknown'}</td>
+                      <td>{repo.language || '-'}</td>
                       <td>{repo.stars || 0}</td>
                       <td>{repo.totalCommits || 0}</td>
                       <td className="text-end">

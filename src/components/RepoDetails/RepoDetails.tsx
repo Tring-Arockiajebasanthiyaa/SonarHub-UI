@@ -748,7 +748,7 @@ const RepoDetails = () => {
                   <div className="text-center mb-4">
                     <h4 className="text-light mb-3">Overall Quality</h4>
                     <Badge bg={branchMetrics.qualityGateStatus === 'OK' ? 'success' : 'danger'} className="fs-4 p-3">
-                      {branchMetrics.qualityGateStatus || 'UNKNOWN'}
+                      {branchMetrics.qualityGateStatus || '-'}
                     </Badge>
                   </div>
                   <h5 className="text-light mb-3 border-bottom pb-2">Issue Summary</h5>
@@ -760,7 +760,7 @@ const RepoDetails = () => {
                       </div>
                     </div>
                     <div className="col-4">
-                      <div className="text-center p-3 bg-dark-800 rounded">
+                      <div className="text-center p-3 bg-dark-800 rounded w-20">
                         <h6 className="text-danger">Vulnerabilities</h6>
                         <h3 className="text-white">{branchMetrics.vulnerabilities || 0}</h3>
                       </div>
@@ -971,7 +971,7 @@ const RepoDetails = () => {
                 <td>
                   {metrics ? (
                     <Badge bg={metrics.qualityGateStatus === 'OK' ? 'success' : 'danger'}>
-                      {metrics.qualityGateStatus || 'UNKNOWN'}
+                      {metrics.qualityGateStatus || '-'}
                     </Badge>
                   ) : '-'}
                 </td>

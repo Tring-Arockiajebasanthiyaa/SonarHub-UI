@@ -105,7 +105,7 @@ const RepositoryBranches = () => {
                   )}
                 </div>
                 <div className="text-muted mb-2">
-                  <small>Last updated: {branch.lastCommitDate || 'Unknown'}</small>
+                  <small>Last updated: {branch.lastCommitDate || '-'}</small>
                 </div>
                 <div className="d-flex justify-content-between align-items-center mt-3">
                   <Button 

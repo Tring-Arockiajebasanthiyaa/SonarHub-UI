@@ -76,7 +76,7 @@ const SonarRepo = () => {
               transition={{ duration: 0.2 }}
             >
               <td>{repo.name}</td>
-              <td>{repo.owner?.username || "Unknown"}</td>
+              <td>{repo.owner?.username || "-"}</td>
               <td>{repo.language || "-"}</td>
               <td>{repo.stars || 0}</td>
               <td>{repo.totalCommits || 0}</td>
