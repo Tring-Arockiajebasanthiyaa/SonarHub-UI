@@ -23,6 +23,8 @@
   padding: 10px 15px;
   border-radius: 4px;
   margin-bottom: 15px;
+  padding-left: 35px;
+  padding-right: 35px;
 }
 
 .form-control:focus {
@@ -73,12 +75,6 @@
   position: relative;
 }
 
-.input-icon {
-  position: absolute;
-  top: 10px;
-  left: 10px;
-  color: #a0a0a0;
-}
 
 .input-container input {
   padding-left: 35px;
@@ -87,6 +83,22 @@
 .hover-effect:hover {
   color: #16cad3 !important;
   transition: all 0.3s ease-in-out;
+}
+
+
+
+.input-icon {
+  position: absolute;
+  left: 10px;
+  top: 50%;
+  transform: translateY(10%);
+}
+
+.password-toggle-icon {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
 }
 
 .signin-footer {

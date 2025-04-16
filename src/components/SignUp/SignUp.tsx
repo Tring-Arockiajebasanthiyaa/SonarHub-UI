@@ -80,8 +80,12 @@ export default function SignUp() {
     window.location.href = githubAuthUrl;
   };
 
-  if (loading) return <p className="text-light text-center">Loading...</p>;
-  if (error) return <p className="text-danger text-center">Error loading authentication status</p>;
+  if (loading){
+    return <p className="text-light text-center">Loading...</p>;
+  }
+  if (error){
+    return <p className="text-danger text-center">Error loading authentication status</p>;
+  }
 
   return (
     <div className="form-container text-center">

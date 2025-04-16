@@ -5,7 +5,7 @@ import { useNavigate } from "react-router-dom";
 import sonar from "../../assets/logo.webp";
 import { FORGOT_PASSWORD, RESET_PASSWORD } from "../Graphql/Mutations";
 import { motion } from "framer-motion";
-import { FaEnvelope, FaLock } from 'react-icons/fa';
+import { FaEnvelope, FaLock ,FaEye,FaEyeSlash} from 'react-icons/fa';
 
 export default function ForgotPassword() {
   const [email, setEmail] = useState("");
@@ -15,7 +15,8 @@ export default function ForgotPassword() {
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
   const navigate = useNavigate();
-
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [forgotPassword] = useMutation(FORGOT_PASSWORD);
   const [resetPassword] = useMutation(RESET_PASSWORD);
 
@@ -23,11 +24,9 @@ export default function ForgotPassword() {
     e.preventDefault();
     try {
       const { data } = await forgotPassword({ variables: { email } });
-      setMessage(data.forgotPassword);
+      setMessage(data.forgotPassword.message);
       setStep("password");
-      if (data.token) {
-        localStorage.setItem("authToken", data.token);
-      }
+      localStorage.setItem("authToken", data.forgotPassword.token);
     } catch (err: any) {
       setError(err.message || "Something went wrong. Try again.");
     }
@@ -45,7 +44,7 @@ export default function ForgotPassword() {
       return;
     }
     try {
-      const { data } = await resetPassword({
+      await resetPassword({
         variables: { token, newPassword },
       });
       setMessage("Password reset successful. Redirecting...");
@@ -104,24 +103,34 @@ export default function ForgotPassword() {
             <div className="mb-3 input-container">
               <FaLock className="input-icon" />
               <input
-                type="password"
+                 type={showNewPassword ? "text" : "password"}
                 className="form-control"
                 placeholder="Enter new password"
                 value={newPassword}
                 onChange={(e) => setNewPassword(e.target.value)}
                 required
               />
+              <span className="password-toggle-icon"
+               onClick={() => setShowNewPassword(!showNewPassword)}
+               style={{ cursor: 'pointer' }}>
+               {showNewPassword ? <FaEyeSlash /> : <FaEye />}
+              </span>
             </div>
             <div className="mb-3 input-container">
               <FaLock className="input-icon" />
               <input
-                type="password"
+               type={showConfirmPassword ? "text" : "password"}
                 className="form-control"
                 placeholder="Confirm new password"
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
                 required
               />
+              <span className="password-toggle-icon"
+                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                  style={{ cursor: 'pointer' }}>
+                  {showConfirmPassword ? <FaEyeSlash /> : <FaEye />}
+              </span>
             </div>
             {error && <p className="error">{error}</p>}
             {message && <p className="success">{message}</p>}

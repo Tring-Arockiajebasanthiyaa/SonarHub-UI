@@ -55,7 +55,9 @@ const RepositoryBranches = () => {
     );
   }
 
-  if (error) return <Alert variant="danger">Error fetching branches: {error.message}</Alert>;
+  if (error){
+    return <Alert variant="danger">Error fetching branches: {error.message}</Alert>;
+  }
 
   return (
     <motion.div

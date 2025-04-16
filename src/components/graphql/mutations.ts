@@ -7,10 +7,14 @@ export const SIGN_IN = gql`
 `;
 
 export const FORGOT_PASSWORD = gql`
-mutation ForgotPassword($email: String!) {
-  forgotPassword(email: $email)
-}
+  mutation ForgotPassword($email: String!) {
+    forgotPassword(email: $email) {
+      message
+      token
+    }
+  }
 `;
+
 
 export const RESET_PASSWORD = gql`
 mutation ResetPassword($token: String!, $newPassword: String!) {

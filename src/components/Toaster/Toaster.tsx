@@ -1,6 +1,6 @@
 import React from "react";
 import { ToastContainer, ToastContentProps, toast, Slide } from "react-toastify";
-import { ToasterType } from "./Types/Toaster.types.tsx";
+import { ToasterType } from "./Types/Toaster.types";
 import "./Toaster.css";
 
 const Toaster: React.FC = () => {
@@ -26,7 +26,9 @@ export const showToast = (
         className="ic-close"
         onClick={() => {
           closeToast();
-          if (navigateTo && navigate) navigate(navigateTo);
+          if (navigateTo && navigate){
+            navigate(navigateTo);
+          }
         }}
       >
       </button>

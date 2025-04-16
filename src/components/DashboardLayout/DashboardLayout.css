@@ -3,6 +3,7 @@
   background-color: #121212;
   color: #e0e0e0;
   min-height: 100vh;
+  /* overflow-y: scroll; */
 }
 
 .sidebar {
@@ -17,6 +18,8 @@
   transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
   transform: translateX(0);
   box-shadow: 5px 0 10px rgba(0, 0, 0, 0.3);
+  overflow-y: auto;
+  overflow-x: hidden;
 }
 
 .sidebar-header {

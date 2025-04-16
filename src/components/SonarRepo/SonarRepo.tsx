@@ -37,9 +37,15 @@ const SonarRepo = () => {
     skip: !githubUsername,
   });
 
-  if (userLoading || loading) return <p>Loading...</p>;
-  if (userError) return <p>Error fetching user data: {userError.message}</p>;
-  if (error) return <p>Error fetching repositories: {error.message}</p>;
+  if (userLoading || loading){
+    return <p>Loading...</p>;
+  }
+  if (userError){
+    return <p>Error fetching user data: {userError.message}</p>;
+  } 
+  if (error){
+    return <p>Error fetching repositories: {error.message}</p>;
+  }
 
   return (
     <motion.div

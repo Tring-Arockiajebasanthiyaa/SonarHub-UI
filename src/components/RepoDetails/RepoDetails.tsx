@@ -6,11 +6,11 @@ import { GET_USER, GET_PROJECT_ANALYSIS, GET_REPO_BRANCHES } from "../Graphql/Qu
 import { motion } from "framer-motion";
 import { TRIGGER_AUTOMATIC_ANALYSIS, ANALYZE_SINGLE_REPOSITORY, TRIGGER_BRANCH_ANALYSIS } from "../Graphql/Mutations";
 import { Badge, ProgressBar, Spinner, Alert, Card, ListGroup, Dropdown, Table, Button } from "react-bootstrap";
-import { FaGithub, FaCode, FaBug, FaShieldAlt, FaExclamationTriangle, FaChartLine, FaCodeBranch } from "react-icons/fa";
+import { FaGithub, FaCode, FaBug, FaShieldAlt, FaExclamationTriangle, FaChartLine, FaCodeBranch, FaSearch, FaInfoCircle } from "react-icons/fa";
 import { GiSpiderWeb } from "react-icons/gi";
 import { RiGitRepositoryLine } from "react-icons/ri";
 import { BsGraphUp, BsFileCode } from "react-icons/bs";
-
+import "./RepoDetails.css";
 interface CodeMetric {
   u_id: string;
   branch: string;
@@ -119,7 +119,7 @@ const RepoDetails = () => {
     },
     skip: !githubUsername || !cleanRepoName || !selectedBranch,
     fetchPolicy: 'network-only',
-    // pollInterval:5000,
+    pollInterval:5000,
     notifyOnNetworkStatusChange: true,
     onError: (err) => {
       setLastError(err.message);
@@ -127,21 +127,33 @@ const RepoDetails = () => {
   });
 
   const [triggerAutomaticAnalysis] = useMutation(TRIGGER_AUTOMATIC_ANALYSIS, {
-    onCompleted: () => {
-      setIsAnalyzingAll(false);
-      setAnalysisStatus("Automatic analysis completed for all repositories");
+    onCompleted: (data) => {
+      if (data.triggerAutomaticAnalysis.success) {
+        setIsAnalyzingAll(false);
+        setAnalysisStatus("Automatic analysis completed for all repositories");
+      } else {
+        setIsAnalyzingAll(false);
+        setAnalysisStatus("Automatic analysis failed");
+        setLastError(data.triggerAutomaticAnalysis.message);
+      }
       refetch();
     },
     onError: (err) => {
       setIsAnalyzingAll(false);
       setLastError(err.message);
     },
-  });
+});
 
   const [analyzeSingleRepository] = useMutation(ANALYZE_SINGLE_REPOSITORY, {
-    onCompleted: () => {
-      setIsAnalyzing(false);
-      setAnalysisStatus("Analysis completed");
+    onCompleted: (data) => {
+      if (data.analyzeSingleRepository.success) {
+        setIsAnalyzing(false);
+        setAnalysisStatus("Analysis completed");
+      } else {
+        setIsAnalyzing(false);
+        setAnalysisStatus("Analysis failed");
+        setLastError(data.analyzeSingleRepository.message);
+      }
       refetch();
     },
     onError: (err) => {
@@ -149,19 +161,26 @@ const RepoDetails = () => {
       setLastError(err.message);
     },
   });
+
 
   const [triggerBranchAnalysis, { loading: isAnalyzingBranch }] = useMutation(TRIGGER_BRANCH_ANALYSIS, {
-    onCompleted: () => {
-      setAnalysisStatus(`Analysis completed for branch ${selectedBranch}`);
+    onCompleted: (data) => {
+      if (data.triggerBranchAnalysis.success) {
+        setAnalysisStatus(`Analysis completed for branch ${selectedBranch}`);
+      } else {
+        setAnalysisStatus(`Analysis failed for branch ${selectedBranch}`);
+        setLastError(data.triggerBranchAnalysis.message);
+      }
       refetch();
     },
     onError: (err) => {
       setLastError(err.message);
     },
   });
-
   const handleTriggerBranchAnalysis = () => {
-    if (!githubUsername || !cleanRepoName || !selectedBranch) return;
+    if (!githubUsername || !cleanRepoName || !selectedBranch){
+      return;
+    }
     setAnalysisStatus(`Analyzing branch ${selectedBranch}...`);
     setLastError(null);
     triggerBranchAnalysis({ 
@@ -174,22 +193,29 @@ const RepoDetails = () => {
   };
 
   const handleAnalyzeRepository = () => {
-    if (!githubUsername || !repoName) return;
+    if (!githubUsername || !repoName){
+       return;
+    }
     setIsAnalyzing(true);
     setAnalysisStatus("Analyzing repository...");
+
     setLastError(null);
     analyzeSingleRepository({ variables: { githubUsername, repoName } });
   };
 
   const handleReanalyze = () => {
-    if (!githubUsername || !repoName) return;
+    if (!githubUsername || !repoName){
+      return;
+    } 
     setAnalysisStatus("Reanalyzing...");
     setLastError(null);
     handleAnalyzeRepository();
   };
 
   const handleAnalyzeAllRepos = () => {
-    if (!githubUsername) return;
+    if (!githubUsername){
+      return;
+    }
     setIsAnalyzingAll(true);
     setAnalysisStatus("Analyzing all repositories...");
     setLastError(null);
@@ -249,6 +275,7 @@ const RepoDetails = () => {
     
     useEffect(() => {
       if (message === "Loading repository data...") {
+
         const interval = setInterval(() => {
           setCurrentMessage(loadingMessages[Math.floor(Math.random() * loadingMessages.length)]);
         }, 3000);
@@ -315,122 +342,15 @@ const RepoDetails = () => {
     );
   };
 
-  if (!repoName) return <div className="container py-4"><Alert variant="danger">Repository name missing</Alert></div>;
+  if (!repoName){
+    return <div className="container py-4"><Alert variant="danger">Repository name missing</Alert></div>;
+  } 
 
   if (branchesLoading || (loading && !data)) {
     return <LoadingScreen showAnalyzeButton={!!selectedBranch} />;
   }
 
-  if (branchesError) {
-    return (
-      <div className="container py-4 bg-dark" style={{ minHeight: '80vh' }}>
-        <div className="text-center py-5 text-white">
-          <motion.div
-            animate={{
-              scale: [1, 1.2, 1],
-              rotate: [0, 10, -10, 0],
-            }}
-            transition={{
-              duration: 1.5,
-              ease: "easeInOut",
-            }}
-          >
-            <FaExclamationTriangle size={80} className="text-danger mb-4" />
-          </motion.div>
-          <h3 className="mb-3">Error Loading Branches</h3>
-          <p className="lead mb-4">{branchesError.message}</p>
-          <button 
-            onClick={() => window.location.reload()} 
-            className="btn btn-primary btn-lg"
-          >
-            <i className="bi bi-arrow-clockwise me-2"></i>Retry
-          </button>
-        </div>
-      </div>
-    );
-  }
-
-  if (error || lastError) {
-    return (
-      <div className="container py-4 bg-dark" style={{ minHeight: '80vh' }}>
-        <div className="text-center py-5 text-white">
-          <motion.div
-            animate={{
-              scale: [1, 1.1, 1],
-              rotate: [0, 5, -5, 0],
-            }}
-            transition={{
-              duration: 1.5,
-              ease: "easeInOut",
-              repeat: Infinity,
-              repeatType: "reverse"
-            }}
-          >
-            <FaBug size={80} className="text-warning mb-4" />
-          </motion.div>
-          <h3 className="mb-3">Analysis Error</h3>
-          <p className="lead mb-4">{lastError || error?.message}</p>
-          <div className="d-flex justify-content-center gap-3">
-            <button 
-              onClick={handleReanalyze} 
-              className="btn btn-primary btn-lg"
-              disabled={isAnalyzing}
-            >
-              {isAnalyzing ? (
-                <>
-                  <Spinner as="span" animation="border" size="sm" className="me-2" />
-                  Processing...
-                </>
-              ) : (
-                <>
-                  <i className="bi bi-arrow-repeat me-2"></i>
-                  {lastError?.includes("not found") ? "Analyze Now" : "Retry"}
-                </>
-              )}
-            </button>
-            <Button
-              variant="info"
-              onClick={handleTriggerBranchAnalysis}
-              disabled={!githubUsername || !repoName || !selectedBranch || isAnalyzingBranch}
-              className="btn-lg"
-            >
-              {isAnalyzingBranch ? (
-                <>
-                  <Spinner as="span" animation="border" size="sm" className="me-2" />
-                  Analyzing...
-                </>
-              ) : (
-                <>
-                  <i className="bi bi-graph-up-arrow me-2"></i>
-                  Analyze Selected Branch
-                </>
-              )}
-            </Button>
-            {githubUsername && (
-              <button 
-                onClick={handleAnalyzeAllRepos} 
-                className="btn btn-success btn-lg"
-                disabled={isAnalyzingAll}
-              >
-                {isAnalyzingAll ? (
-                  <>
-                    <Spinner as="span" animation="border" size="sm" className="me-2" />
-                    Analyzing...
-                  </>
-                ) : (
-                  <>
-                    <i className="bi bi-collection me-2"></i>
-                    Analyze All
-                  </>
-                )}
-              </button>
-            )}
-          </div>
-        </div>
-      </div>
-    );
-  }
-
+  
   const projectAnalysis = data?.getProjectAnalysis;
   const project = projectAnalysis?.project;
   const branches = projectAnalysis?.branches || [];
@@ -445,36 +365,115 @@ const RepoDetails = () => {
   if (!project) {
     return (
       <div className="container py-4 bg-dark text-white">
-        <Alert variant="warning">
-          <h5>No Analysis Data Found</h5>
-          <p>This repository hasn't been analyzed yet.</p>
-          <button onClick={handleAnalyzeRepository} className="btn btn-primary" disabled={isAnalyzing}>
-            Analyze Now
-          </button>
+        <Alert variant={(!githubUsername || !repoName) ? 'info' : 'warning'} className="mb-0">
+          <div className="d-flex align-items-center justify-content-between">
+            <div className="d-flex align-items-center">
+              {(!githubUsername || !repoName) ? (
+                <FaInfoCircle className="me-3 fs-4" />
+              ) : (
+                <FaSearch className="me-3 fs-4" />
+              )}
+              <div>
+                <h5 className="mb-1">
+                  {(!githubUsername || !repoName) 
+                    ? 'Missing Information' 
+                    : 'No Analysis Data Found'}
+                </h5>
+                <p className="mb-0">
+                  {!githubUsername && !repoName 
+                    ? 'Please provide both GitHub username and repository name'
+                    : !githubUsername 
+                      ? 'GitHub username is required to continue'
+                      : !repoName
+                        ? 'Repository name is required to continue'
+                        : 'This repository has not been analyzed yet'}
+                </p>
+              </div>
+            </div>
+            <Button 
+              variant={(!githubUsername || !repoName) ? 'outline-info' : 'outline-warning'}
+              onClick={() => window.location.reload()}  
+              className="ms-3"
+            >
+              <i className="bi bi-arrow-clockwise me-2"></i>
+              Refresh 
+            </Button>
+          </div>
         </Alert>
       </div>
     );
   }
-
   return (
     <div className="container py-4 bg-dark text-white">
-      <div className="d-flex justify-content-between align-items-center mb-4">
+      {branchesError && (
+      <Alert variant="danger" className="mb-4">
+        <div className="d-flex align-items-center justify-content-between">
+          <div>
+            <FaExclamationTriangle className="me-2" />
+            <strong>Branch Error:</strong> {branchesError.message}
+          </div>
+          <button 
+            onClick={() => window.location.reload()} 
+            className="btn btn-sm btn-outline-light"
+          >
+            <i className="bi bi-arrow-clockwise me-1"></i>Reload
+          </button>
+        </div>
+      </Alert>
+    )}
+
+    {(error || lastError) && (
+      <Alert variant="danger" className="mb-4">
+        <div className="d-flex align-items-center justify-content-between">
+          <div>
+            <FaBug className="me-2" />
+            <strong>Analysis Error:</strong> {lastError || error?.message}
+          </div>
+          <div className="d-flex gap-2">
+            <Button 
+              variant="outline-light" 
+              size="sm"
+              onClick={handleTriggerBranchAnalysis}
+              disabled={isAnalyzing}
+            >
+              {isAnalyzing ? (
+                <Spinner size="sm" className="me-1" />
+              ) : (
+                <i className="bi bi-arrow-repeat me-1"></i>
+              )}
+              Retry
+            </Button>
+            {githubUsername && (
+              <Button 
+                variant="outline-light" 
+                size="sm"
+                onClick={handleAnalyzeRepository}
+                disabled={isAnalyzing}
+              >
+                {isAnalyzing ? (
+                  <Spinner size="sm" className="me-1" />
+                ) : (
+                  <i className="bi bi-collection me-1"></i>
+                )}
+                Analyze Repo
+              </Button>
+            )}
+          </div>
+        </div>
+      </Alert>
+    )}
+      <div className="d-flex justify-content-between align-items-center mb-4 ">
         <div>
-          <h1 className="mb-1 d-flex align-items-center">
+          <h1 className="mb-1 align-items-center">
             <RiGitRepositoryLine className="me-2" />
             {project?.title || repoName}
             {selectedBranch && (
-              <Badge bg="light" text="dark" className="ms-2">
+              <Badge bg="light" text="dark" className="ms-1">
                 <FaCodeBranch className="me-1" />
                 {selectedBranch}
               </Badge>
             )}
           </h1>
-          {project?.description && (
-            <p className="text-light mb-0">
-              {project.description}
-            </p>
-          )}
         </div>
         <div className="d-flex gap-2">
           <Dropdown>
@@ -512,13 +511,8 @@ const RepoDetails = () => {
             )}
           </Button>
           <button onClick={handleReanalyze} className="btn btn-primary" disabled={isAnalyzing}>
-            <i className="bi bi-arrow-repeat me-2"></i>Reanalyze
+            <i className="bi bi-arrow-repeat me-2"></i>Analyze Repo
           </button>
-          {githubUsername && (
-            <button onClick={handleAnalyzeAllRepos} className="btn btn-success" disabled={isAnalyzingAll}>
-              <i className="bi bi-collection me-2"></i>Analyze All
-            </button>
-          )}
         </div>
       </div>
 
@@ -591,17 +585,15 @@ const RepoDetails = () => {
                 <ListGroup.Item className="bg-transparent text-light border-secondary">
                   <strong>Analysis Duration:</strong> {project?.analysisDuration || 0} seconds
                 </ListGroup.Item>
-                <ListGroup.Item className="bg-transparent text-light border-secondary">
-                  <strong>Result:</strong>{' '}
-                    {analysisStatus ? (
-                      <Alert variant={
-                          analysisStatus.toLowerCase().includes('success') ? 'success' :
-                          analysisStatus.toLowerCase().includes('fail') ? 'danger' :
-                          analysisStatus.toLowerCase().includes('warning') ? 'warning' :
-                          'info'
-                        } className="mb-0">{analysisStatus}</Alert>) : (<span className="text-muted">Pending analysis...</span>)}
-                </ListGroup.Item>
-
+                <ListGroup.Item  className={`bg-transparent border-secondary
+                ${
+                   project?.result?.toLowerCase() === 'analysis completed' ? 'text-success' :
+                   project?.result?.toLowerCase().includes('analysis failed') ? 'text-danger' :
+                   'text-info'
+                  }
+                `}> <strong>Result:</strong>
+                 {project?.result ?? 'No result'}
+                 </ListGroup.Item>
               </ListGroup>
             </Card.Body>
           </Card>
@@ -869,41 +861,40 @@ const RepoDetails = () => {
             <FaExclamationTriangle className="me-2" />
             Issues ({branchIssues.length})
           </h5>
-          
         </Card.Header>
-        <Card.Body className="p-0">
+        <Card.Body>
           {branchIssues.length > 0 ? (
-            <Table striped bordered hover variant="dark" className="mb-0">
-              <thead>
-                <tr>
-                  <th>Severity</th>
-                  <th>Message</th>
-                  <th>Location</th>
-                  <th>Type</th>
+            <Table striped bordered hover variant="dark" className="mb-0 table-fixed text-wrap">
+            <thead>
+              <tr>
+                <th>Severity</th>
+                <th>Message</th>
+                <th>Location</th>
+                <th>Type</th>
+              </tr>
+            </thead>
+            <tbody>
+              {branchIssues.map((issue: SonarIssue) => (
+                <tr key={issue.u_id}>
+                  <td>
+                    <Badge bg={getSeverityVariant(issue.severity)}>
+                      {issue.severity}
+                    </Badge>
+                  </td>
+                  <td>
+                    <div className="fw-bold">{issue.message}</div>
+                    <small className="text-muted">{issue.rule}</small>
+                  </td>
+                  <td>
+                    {issue.component.split(":").pop()}:{issue.line}
+                  </td>
+                  <td className="text-uppercase">
+                    <Badge bg="secondary">{issue.type}</Badge>
+                  </td>
                 </tr>
-              </thead>
-              <tbody>
-                {branchIssues.map((issue: SonarIssue) => (
-                  <tr key={issue.u_id}>
-                    <td>
-                      <Badge bg={getSeverityVariant(issue.severity)}>
-                        {issue.severity}
-                      </Badge>
-                    </td>
-                    <td>
-                      <div className="fw-bold">{issue.message}</div>
-                      <small className="text-muted">{issue.rule}</small>
-                    </td>
-                    <td>
-                      {issue.component.split(":").pop()}:{issue.line}
-                    </td>
-                    <td>
-                      <Badge bg="secondary" className="text-uppercase">{issue.type}</Badge>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </Table>
+              ))}
+            </tbody>
+          </Table>
           ) : (
             <div className="text-center py-5">
               <i className="bi bi-check-circle-fill text-success fs-1 mb-3"></i>
@@ -964,11 +955,13 @@ const RepoDetails = () => {
             const issues = allSonarIssues.filter((i: SonarIssue) => i.branch === branch.name);
             
             return (
+              
               <tr key={`${branch.name}-${branch.dashboardUrl}`}>
                 <td>
                   {branch.name}
                   {branch.name === selectedBranch && (
-                    <Badge bg="info" className="ms-2">Current</Badge>
+                    
+                    <Badge bg="info" className="ms-2">Current </Badge>
                   )}
                   {branch.name === project?.defaultBranch && (
                     <Badge bg="primary" className="ms-2">Default</Badge>
@@ -1041,52 +1034,60 @@ const RepoDetails = () => {
           })}
       </tbody>
     </Table>
-  </Card.Body>
-        </Card>
-      <div className="d-flex justify-content-between mb-4">
-        <div>
-          {analysisStatus && (
-            <Alert variant="info" className="mb-0">
-              <i className="bi bi-info-circle me-2"></i>
-              {analysisStatus}
-            </Alert>
-          )}
-          {lastError && (
-            <Alert variant="danger" className="mb-0">
-              <i className="bi bi-exclamation-triangle me-2"></i>
-              {lastError}
-            </Alert>
-          )}
+   </Card.Body>
+  </Card>
+  <div className="status-controls-container mb-4">
+ 
+  <div className="alerts-container">
+    {analysisStatus && (
+      <Alert variant="info" className="status-alert">
+        <div className="d-flex align-items-center">
+          <i className="bi bi-info-circle me-2"></i>
+          <span>{analysisStatus}</span>
         </div>
-        <div className="d-flex gap-3">
-          <Button
-            variant="outline-secondary"
-            onClick={() => refetch()}
-            disabled={loading}
-          >
-            <i className="bi bi-arrow-clockwise me-2"></i>
-            Refresh All Data
-          </Button>
-          <Button
-            variant="danger"
-            onClick={handleAnalyzeAllRepos}
-            disabled={isAnalyzingAll}
-          >
-            {isAnalyzingAll ? (
-              <>
-                <Spinner as="span" animation="border" size="sm" className="me-2" />
-                Analyzing All...
-              </>
-            ) : (
-              <>
-                <i className="bi bi-collection me-2"></i>
-                Analyze All Branches
-              </>
-            )}
-          </Button>
+      </Alert>
+    )}
+    {lastError && (
+      <Alert variant="danger" className="error-alert">
+        <div className="d-flex align-items-center">
+          <i className="bi bi-exclamation-triangle me-2"></i>
+          <span>{lastError}</span>
         </div>
-      </div>
-    </div>
+      </Alert>
+    )}
+  </div>
+
+  <div className="actions-container">
+    <Button
+      variant="outline-light"
+      onClick={() => refetch()}
+      disabled={loading}
+      className="action-btn refresh-btn"
+    >
+      <i className="bi bi-arrow-clockwise me-2"></i>
+      Refresh
+    </Button>
+    <Button
+      variant="primary"
+      onClick={handleAnalyzeRepository}
+      disabled={isAnalyzing}
+      className="action-btn analyze-btn"
+    >
+      {isAnalyzing ? (
+        <>
+          <Spinner as="span" animation="border" size="sm" className="me-2" />
+          Analyzing...
+        </>
+      ) : (
+        <>
+          <i className="bi bi-magic me-2"></i>
+          Analyze Repo
+        </>
+      )}
+    </Button>
+  </div>
+</div>
+</div>
   );
 };
 

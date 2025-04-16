@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from "react";
-import { useQuery } from "@apollo/client";
+import { useQuery,  ApolloProvider  } from "@apollo/client";
 import { GET_USER_REPOSITORIES } from "../Graphql/Queries";
 import apolloGitHubClient from "../Graphql/ApolloGitHubClient";
-import { ApolloProvider } from "@apollo/client";
 import "./GitHubRepo.css"
 const GitHubReposComponent: React.FC = () => {
   const [username, setUsername] = useState("");
@@ -16,7 +15,9 @@ const GitHubReposComponent: React.FC = () => {
   }, []);
 
   const handleSearch = () => {
-    if (username) refetch();
+    if (username){
+      refetch();
+    }
   };
 
   return (

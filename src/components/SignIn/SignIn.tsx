@@ -1,4 +1,4 @@
-import React from "react";
+import React ,{useState}from "react";
 import { useForm, SubmitHandler } from "react-hook-form";
 import { useMutation } from "@apollo/client";
 import { useNavigate } from "react-router-dom";
@@ -9,7 +9,7 @@ import sonar from "../../assets/logo.webp";
 import "./SignIn.css";
 import "bootstrap/dist/css/bootstrap.min.css";
 import { motion } from "framer-motion";
-import { FaUser, FaLock } from 'react-icons/fa';
+import { FaUser, FaLock ,FaEye,FaEyeSlash} from 'react-icons/fa';
 
 interface SignInFormInputs {
   email: string;
@@ -24,7 +24,7 @@ export default function SignIn() {
   } = useForm<SignInFormInputs>();
   const navigate = useNavigate();
   const { setIsAuthenticated, setAuthToken, setUserEmail } = useAuth();
-
+  const [showPassword, setShowPassword] = useState(false);
   const [signIn] = useMutation(SIGN_IN);
 
   const handleLogin: SubmitHandler<SignInFormInputs> = async ({
@@ -82,14 +82,17 @@ export default function SignIn() {
           </div>
 
           <div className="mb-3 input-container">
-            <FaLock className="input-icon" />
-            <input
-              type="password"
-              className="form-control"
-              placeholder="Password"
-              {...register("password", { required: "Password is required" })}
-            />
-            {errors.password && <p className="error">{errors.password.message}</p>}
+             <FaLock className="input-icon" />
+                <input type={showPassword ? "text" : "password"}
+                  className="form-control"
+                  placeholder="Password"
+                  {...register("password", { required: "Password is required" })}/>
+              <span className="password-toggle-icon"
+                onClick={() => setShowPassword(!showPassword)}
+                style={{ cursor: 'pointer' }}>
+                {showPassword ? <FaEyeSlash /> : <FaEye />}
+              </span>
+              {errors.password && <p className="error">{errors.password.message}</p>}
           </div>
 
           <div className="mb-3">

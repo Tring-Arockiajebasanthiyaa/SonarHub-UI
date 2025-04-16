@@ -6,11 +6,15 @@ const SonarIssues = ({ githubUsername }: { githubUsername: string }) => {
   const { data, loading, error } = useQuery(GET_USER_ACTIVITY, { variables: { githubUsername } });
 
   useEffect(() => {
-    console.log("SonarIssues Data:", data); // Debugging Step 1
+    console.log("SonarIssues Data:", data); 
   }, [data]);
 
-  if (loading) return <p>Loading...</p>;
-  if (error) return <p>Error: {error.message}</p>;
+  if (loading){
+    return <p>Loading...</p>;
+  }
+  if (error){
+    return <p>Error: {error.message}</p>;
+  }
 
   return (
     <div className="container mt-4">

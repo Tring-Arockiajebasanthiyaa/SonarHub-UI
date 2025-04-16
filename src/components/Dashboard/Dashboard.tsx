@@ -28,12 +28,15 @@ import { REQUEST_GITHUB_AUTH } from "../Graphql/Mutations";
 import { Button } from "react-bootstrap";
 
 const Dashboard: React.FC = () => {
+  const DATE_FORMAT = "DD-MM-YYYY";
   const navigate = useNavigate();
   const { userEmail } = useAuth();
   const [githubUsername, setGithubUsername] = useState<string | null>(null);
-
+  
   useEffect(() => {
-    if (!userEmail) navigate("/signin");
+    if (!userEmail){
+      navigate("/signin");
+    }
   }, [userEmail, navigate]);
 
   const { data: userData } = useQuery(GET_USER, {
@@ -56,8 +59,13 @@ const Dashboard: React.FC = () => {
   }, [githubUsername, fetchUserActivity]);
 
   const useActivity = useMemo(() => data?.getUserActivity || {}, [data]);
+  const hasConnectedGithub = useMemo(() => {
+    return !!(githubUsername && typeof useActivity.privateRepoCount === 'number');
+  }, [githubUsername, useActivity.privateRepoCount]);
+  
+  
   const [requestGithubAuth] = useMutation(REQUEST_GITHUB_AUTH);
-    const handleGithubLogin = async () => {
+  const handleGithubLogin = async () => {
       try {
         const { data: authUrlResult } = await requestGithubAuth({
           variables: { username: githubUsername },
@@ -88,10 +96,10 @@ const Dashboard: React.FC = () => {
       { title: "Public Repos", data: useActivity.publicRepoCount || 0, icon: faGlobe, color: "#20b2aa" },
       { title: "Private Repos", data: useActivity.privateRepoCount || 0, icon: faLock, color: "#9370db" },
       { title: "Languages Used", data: useActivity.languagesUsed?.join(", ") || "-", icon: faLanguage, color: "#ff8c00" },
-      { title: "Recently Created Repo", data: useActivity.topContributedRepo || "-", icon: faFire, color: "#ff4500" },
-      { title: "Earliest Repo Created", data: moment(useActivity.earliestRepoCreatedAt).format("DD-MM-YYYY") || "-", icon: faCalendarAlt, color: "#8a2be2" },
-      { title: "Most Recently Updated Repo", data: moment(useActivity.mostRecentlyUpdatedRepo).format("DD-MM-YYYY") || "-", icon: faClock, color: "#6495ed" },
-      { title: "Last Active", data: moment(useActivity.lastActive).format("DD-MM-YYYY") || "-", icon: faClock, color: "#6495ed" },
+      { title: "Top Contributed Repo", data: useActivity.topContributedRepo || "-", icon: faFire, color: "#ff4500" },
+      { title: "Earliest Repo Created", data: moment(useActivity.earliestRepoCreatedAt).format(DATE_FORMAT) || "-", icon: faCalendarAlt, color: "#8a2be2" },
+      { title: "Most Recently Updated Repo", data: moment(useActivity.mostRecentlyUpdatedRepo).format( DATE_FORMAT) || "-", icon: faClock, color: "#6495ed" },
+      { title: "Last Active", data: moment(useActivity.lastActive).format( DATE_FORMAT) || "-", icon: faClock, color: "#6495ed" },
       { title: "Code Vulnerabilities", data: useActivity.sonarIssues || "-", icon: faBug, color: "#ff6347" },
       { title: "Issue Rate (%)", data: useActivity.issuePercentage || "0%", icon: faShieldAlt, color: "#4682b4" },
       { title: "Danger Level", data: useActivity.dangerLevel || "Low", icon: faExclamationTriangle, color: "#ff0000" },
@@ -104,10 +112,19 @@ const Dashboard: React.FC = () => {
       <header className="header">
         <h4 className="header-title text-center">🚀 Developer Performance Dashboard</h4>
         <div className="text-center">
-          <Button variant="dark" className="me-5 mt-3" onClick={handleGithubLogin}>
-             <FaGithub className="me-1" />
-               Connect GitHub
+        <div className="text-center mt-3">
+        {hasConnectedGithub ? (
+          <span className="badge bg-success fs-6 px-3 py-2">
+            <FaGithub className="me-2" />
+              GitHub Connected
+          </span>
+          ) : (
+          <Button variant="dark" className="me-5" onClick={handleGithubLogin}>
+            <FaGithub className="me-1" />
+              Connect GitHub
           </Button>
+          )}
+        </div>
         </div>
       </header>
       

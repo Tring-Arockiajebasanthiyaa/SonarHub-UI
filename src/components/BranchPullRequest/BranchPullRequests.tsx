@@ -30,7 +30,9 @@ const BranchPullRequests = () => {
 
   const handleTriggerAnalysis = async () => {
     const firstPR = data?.getPullRequestsByBranch?.[0];
-    if (!firstPR) return;
+    if (!firstPR){
+      return;
+    } 
   
     setIsAnalyzing(true); 
     try {
@@ -79,7 +81,6 @@ const BranchPullRequests = () => {
   const {
     loading: userLoading,
     error: userError,
-    data: userData,
   } = useQuery(GET_USER, {
     variables: { email: userEmail },
     skip: !userEmail,

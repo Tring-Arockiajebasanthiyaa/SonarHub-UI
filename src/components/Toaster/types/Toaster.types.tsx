@@ -1,1 +1,2 @@
 export type ToasterType = "success" | "error" | "info" | "warning";
+

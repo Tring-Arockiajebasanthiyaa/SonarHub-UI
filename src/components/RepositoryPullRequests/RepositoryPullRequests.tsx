@@ -51,8 +51,12 @@ const RepositoryCards = () => {
     );
   }
 
-  if (userError) return <Alert variant="danger">Error fetching user data: {userError.message}</Alert>;
-  if (error) return <Alert variant="danger">Error fetching repositories: {error.message}</Alert>;
+  if (userError){
+    return <Alert variant="danger">Error fetching user data: {userError.message}</Alert>;
+  }
+  if (error){
+    return <Alert variant="danger">Error fetching repositories: {error.message}</Alert>;
+  } 
 
   return (
     <motion.div
