@@ -206,7 +206,7 @@ const BranchPullRequests = () => {
               Analyzing...
             </>
           ) : (
-            "Trigger SonarQube Analysis"
+            "Post comments in PR"
           )}
         </Button>
 

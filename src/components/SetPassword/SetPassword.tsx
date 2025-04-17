@@ -13,7 +13,7 @@ export default function SetPassword() {
   const [email, setEmail] = useState("");
   const [error, setError] = useState("");
   const navigate = useNavigate();
-
+  
   const { data ,refetch} = useQuery(GET_SIGNUP_EMAIL);
   const [setPasswordMutation] = useMutation(SET_PASSWORD);
   useEffect(() => {
